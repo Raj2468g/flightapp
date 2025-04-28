@@ -1,0 +1,16 @@
+<table>
+    <tr>
+      <th>User Username</th>
+      <th>:</th>
+      <th><input type="text" [(ngModel)]="uname" /></th>
+    </tr>
+    <tr>
+      <th>Password</th>
+      <th>:</th>
+      <th><input type="password" [(ngModel)]="pwd" /></th>
+    </tr>
+    <tr>
+      <th colspan="2"><input type="button" value="Login" (click)="loginCheck()" /></th>
+    </tr>
+  </table>
+  <h1>{{msg}}</h1>

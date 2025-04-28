@@ -1,0 +1,18 @@
+<div class="container">
+  <h2>Manage Bookings</h2>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  <table>
+    <tr>
+      <th>User ID</th>
+      <th>Flight Number</th>
+      <th>Booking Date</th>
+      <th>Actions</th>
+    </tr>
+    <tr *ngFor="let booking of bookings">
+      <td>{{ booking.userId }}</td>
+      <td>{{ booking.flightId }}</td>
+      <td>{{ booking.bookingDate | date:'short' }}</td>
+      <td><button (click)="deleteBooking(booking._id ?? '')" class="delete-btn">Delete</button></td>
+    </tr>
+  </table>
+</div>

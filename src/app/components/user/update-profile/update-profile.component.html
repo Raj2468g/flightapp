@@ -1,0 +1,15 @@
+<h2>Update Profile</h2>
+     <table>
+       <tr>
+         <th>Name</th>
+         <th><input [(ngModel)]="user.name"></th>
+       </tr>
+       <tr>
+         <th>Email</th>
+         <th><input [(ngModel)]="user.email"></th>
+       </tr>
+       <tr>
+         <th colspan="2"><button (click)="updateProfile()">Update</button></th>
+       </tr>
+     </table>
+     <h3>{{msg}}</h3>

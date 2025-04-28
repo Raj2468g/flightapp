@@ -1,0 +1,8 @@
+<h1>Admin Dashboard</h1>
+     <p>Welcome, Admin!</p>
+     <nav>
+       <a routerLink="/admin/flights">Manage Flights</a> |
+       <a routerLink="/admin/bookings">Manage Bookings</a> |
+       <button (click)="logout()">Logout</button>
+     </nav>
+     <router-outlet></router-outlet>

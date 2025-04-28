@@ -1,0 +1,12 @@
+.form-group input {
+    margin-right: 10px;
+    width: calc(20% - 10px);
+    display: inline-block;
+  }
+  
+  @media (max-width: 600px) {
+    .form-group input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
