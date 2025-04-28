@@ -16,13 +16,17 @@ import { Component, OnInit } from '@angular/core';
 
        ngOnInit() {
          const user = this.authService.getCurrentUser();
-         this.bookingService.getBookings(user._id).subscribe(bookings => this.bookings = bookings);
+         if (user && user._id) {
+           this.bookingService.getBookings(user._id).subscribe(bookings => this.bookings = bookings);
+         }
        }
 
        cancelBooking(id: string) {
          this.bookingService.deleteBooking(id).subscribe(() => {
            const user = this.authService.getCurrentUser();
-           this.bookingService.getBookings(user._id).subscribe(bookings => this.bookings = bookings);
+           if (user && user._id) {
+             this.bookingService.getBookings(user._id).subscribe(bookings => this.bookings = bookings);
+           }
          });
        }
-     }
+}

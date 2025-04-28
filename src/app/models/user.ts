@@ -1,8 +1,9 @@
 export interface User {
-    _id?: string;
-    username: string;
-    password: string;
-    name: string;
-    email: string;
-    role: 'user';
-  }
+  id: string;
+  _id?: string;  // Add the _id property
+  username: string;
+  password: string;
+  name: string;
+  email: string;
+  role: string;
+}
