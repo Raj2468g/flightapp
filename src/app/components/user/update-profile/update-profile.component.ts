@@ -10,7 +10,7 @@ import { User } from '../../../models/user';
   standalone:false
 })
 export class UpdateProfileComponent implements OnInit {
-  user: User = { id: '', username: '', password: '', name: '', email: '', role: 'user' };
+  user: User = { _id: '', id: '', username: '', password: '', name: '', email: '', role: 'user' };
   msg: string = '';
 
   constructor(private authService: AuthService, private http: HttpClient) {}
@@ -19,6 +19,7 @@ export class UpdateProfileComponent implements OnInit {
     const currentUser = this.authService.getCurrentUser() as { _id: string; role: string; username?: string; password?: string; name?: string; email?: string };
     if (currentUser) {
       this.user = { 
+        _id: currentUser._id, 
         id: currentUser._id, 
         username: currentUser.username || '', 
         password: currentUser.password || '', 

@@ -16,6 +16,8 @@ import { BookTicketComponent } from './components/user/book-ticket/book-ticket.c
 import { ViewTicketsComponent } from './components/user/view-tickets/view-tickets.component';
 import { UpdateProfileComponent } from './components/user/update-profile/update-profile.component';
 import { AuthGuard } from './guards/auth.guard';
+import { UserNavComponent } from './components/user/user-nav/user-nav.component';
+import { AdminNavComponent } from './components/admin/admin-nav/admin-nav.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { AuthGuard } from './guards/auth.guard';
     UserDashboardComponent,
     ViewTicketsComponent,
     BookTicketComponent,
-    UpdateProfileComponent
+    UpdateProfileComponent,
+    UserNavComponent,
+    AdminNavComponent
   ],
   imports: [
     BrowserModule,

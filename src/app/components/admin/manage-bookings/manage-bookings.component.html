@@ -12,7 +12,7 @@
       <td>{{ booking.userId }}</td>
       <td>{{ booking.flightId }}</td>
       <td>{{ booking.bookingDate | date:'short' }}</td>
-      <td><button (click)="deleteBooking(booking._id ?? '')" class="delete-btn">Delete</button></td>
+      <td><button (click)="deleteBooking(booking._id)" class="delete-btn">Delete</button></td>
     </tr>
   </table>
 </div>
