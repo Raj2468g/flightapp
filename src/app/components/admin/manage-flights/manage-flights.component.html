@@ -1,33 +1,134 @@
-<div class="container">
-  <h2>Manage Flights</h2>
-  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-  <div class="form-group">
-    <input [(ngModel)]="newFlight.flightNumber" placeholder="Flight Number" />
-    <input [(ngModel)]="newFlight.origin" placeholder="Origin" />
-    <input [(ngModel)]="newFlight.destination" placeholder="Destination" />
-    <input [(ngModel)]="newFlight.departureTime" placeholder="Departure Time (YYYY-MM-DDTHH:MM:SSZ)" />
-    <input type="number" [(ngModel)]="newFlight.price" placeholder="Price" />
-    <input type="number" [(ngModel)]="newFlight.maxTickets" placeholder="Max Tickets" />
-    <button (click)="addFlight()" class="btn">Add Flight</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<div class="manage-flights-container">
+  <h2><i class="fas fa-plane"></i> Manage Flights</h2>
+
+  <!-- Add Flight Form -->
+  <div class="add-flight-form">
+    <h3><i class="fas fa-plus-circle"></i> Add New Flight</h3>
+    <form (ngSubmit)="addFlight()" class="flight-form">
+      <div class="form-group">
+        <label for="flightNumber"><i class="fas fa-hashtag"></i> Flight Number</label>
+        <input type="text" id="flightNumber" [(ngModel)]="newFlight.flightNumber" name="flightNumber" required>
+      </div>
+      <div class="form-group">
+        <label for="departure"><i class="fas fa-plane-departure"></i> Departure</label>
+        <input type="text" id="departure" [(ngModel)]="newFlight.departure" name="departure" required>
+      </div>
+      <div class="form-group">
+        <label for="destination"><i class="fas fa-plane-arrival"></i> Destination</label>
+        <input type="text" id="destination" [(ngModel)]="newFlight.destination" name="destination" required>
+      </div>
+      <div class="form-group">
+        <label for="date"><i class="fas fa-calendar-alt"></i> Date</label>
+        <input type="date" id="date" [(ngModel)]="newFlight.date" name="date" required>
+      </div>
+      <div class="form-group">
+        <label for="time"><i class="fas fa-clock"></i> Time</label>
+        <input type="time" id="time" [(ngModel)]="newFlight.time" name="time">
+      </div>
+      <div class="form-group">
+        <label for="maxTickets"><i class="fas fa-ticket-alt"></i> Max Tickets</label>
+        <input type="number" id="maxTickets" [(ngModel)]="newFlight.maxTickets" name="maxTickets" required>
+      </div>
+      <div class="form-group">
+        <label for="price"><i class="fas fa-dollar-sign"></i> Price ($)</label>
+        <input type="number" id="price" [(ngModel)]="newFlight.price" name="price" required>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Flight</button>
+    </form>
   </div>
-  <table>
-    <tr>
-      <th>Flight Number</th>
-      <th>Origin</th>
-      <th>Destination</th>
-      <th>Departure Time</th>
-      <th>Price</th>
-      <th>Max Tickets</th>
-      <th>Actions</th>
-    </tr>
-    <tr *ngFor="let flight of flights">
-      <td>{{ flight.flightNumber }}</td>
-      <td>{{ flight.origin }}</td>
-      <td>{{ flight.destination }}</td>
-      <td>{{ flight.departureTime | date:'short' }}</td>
-      <td>{{ flight.price }}</td>
-      <td>{{ flight.maxTickets }}</td>
-      <td><button (click)="flight._id && deleteFlight(flight._id)" class="delete-btn">Delete</button></td>
-    </tr>
-  </table>
+
+  <!-- Flight List -->
+  <div class="flight-grid">
+    <div *ngIf="flights.length === 0" class="no-flights">
+      <i class="fas fa-exclamation-circle"></i> No flights found.
+    </div>
+    <div *ngFor="let flight of flights" class="flight-card" [ngClass]="{'upcoming': flight.date >= '2025-05-01', 'past': flight.date < '2025-05-01'}">
+      <div class="card-header">
+        <span class="flight-number">
+          <i class="fas status-icon" [ngClass]="{'fa-plane': flight.date >= '2025-05-01', 'fa-check-circle': flight.date < '2025-05-01'}"></i>
+          {{ flight.flightNumber }}
+        </span>
+        <div class="action-buttons">
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <button class="btn btn-success" (click)="saveFlight()" title="Save Changes"><i class="fas fa-save"></i></button>
+            <button class="btn btn-secondary" (click)="cancelEdit()" title="Cancel"><i class="fas fa-times"></i></button>
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            <button class="btn btn-primary" (click)="editFlight(flight)" title="Edit Flight"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger" (click)="deleteFlight(flight._id ?? '')" title="Delete Flight"><i class="fas fa-trash"></i></button>
+          </ng-container>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-plane-departure"></i> Departure:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="text" [(ngModel)]="editingFlight!.departure" name="editDeparture">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            {{ flight.departure }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-plane-arrival"></i> Destination:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="text" [(ngModel)]="editingFlight!.destination" name="editDestination">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            {{ flight.destination }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-calendar-alt"></i> Date:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="date" [(ngModel)]="editingFlight!.date" name="editDate">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            {{ flight.date }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-clock"></i> Time:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="time" [(ngModel)]="editingFlight!.time" name="editTime">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            <span class="time-display">{{ flight.time }}</span>
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-ticket-alt"></i> Max Tickets:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="number" [(ngModel)]="editingFlight!.maxTickets" name="editMaxTickets">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            {{ flight.maxTickets }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-ticket-alt"></i> Available Tickets:</span>
+          {{ flight.availableTickets }}
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-dollar-sign"></i> Price:</span>
+          <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
+            <input type="number" [(ngModel)]="editingFlight!.price" name="editPrice">
+          </ng-container>
+          <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
+            <span class="price-display">${{ flight.price }}</span>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<div class="manage-users-container">
+  <h2><i class="fas fa-users"></i> Manage Users</h2>
+
+  <!-- Add User Form -->
+  <div class="add-user-form">
+    <h3><i class="fas fa-plus-circle"></i> Add New User</h3>
+    <form (ngSubmit)="addUser()" class="user-form">
+      <div class="form-group">
+        <label for="username"><i class="fas fa-user"></i> Username</label>
+        <input type="text" id="username" [(ngModel)]="newUser.username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" id="email" [(ngModel)]="newUser.email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password"><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="password" [(ngModel)]="newUser.password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="phone"><i class="fas fa-phone"></i> Phone</label>
+        <input type="text" id="phone" [(ngModel)]="newUser.phone" name="phone">
+      </div>
+      <div class="form-group">
+        <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+        <select id="gender" [(ngModel)]="newUser.gender" name="gender">
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="role"><i class="fas fa-user-shield"></i> Role</label>
+        <select id="role" [(ngModel)]="newUser.role" name="role" required>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add User</button>
+    </form>
+  </div>
+
+  <!-- User List -->
+  <div class="user-grid">
+    <div *ngIf="users.length === 0" class="no-users">
+      <i class="fas fa-exclamation-circle"></i> No users found.
+    </div>
+    <div *ngFor="let user of users" class="user-card">
+      <div class="card-header">
+        <span class="user-username">
+          <i class="fas fa-user"></i>
+          {{ user.username }}
+        </span>
+        <div class="action-buttons">
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <button class="btn btn-success" (click)="saveUser()" title="Save Changes"><i class="fas fa-save"></i></button>
+            <button class="btn btn-secondary" (click)="cancelEdit()" title="Cancel"><i class="fas fa-times"></i></button>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            <button class="btn btn-primary" (click)="editUser(user)" title="Edit User"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger" (click)="user._id && deleteUser(user._id)" title="Delete User"><i class="fas fa-trash"></i></button>
+          </ng-container>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-user"></i> Username:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="text" [(ngModel)]="editingUser!.username" name="editUsername">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.username }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-envelope"></i> Email:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="email" [(ngModel)]="editingUser!.email" name="editEmail">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.email }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-phone"></i> Phone:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="text" [(ngModel)]="editingUser!.phone" name="editPhone">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.phone || 'N/A' }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-venus-mars"></i> Gender:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <select [(ngModel)]="editingUser!.gender" name="editGender">
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.gender || 'N/A' }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-user-shield"></i> Role:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <select [(ngModel)]="editingUser!.role" name="editRole">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.role }}
+          </ng-container>
+        </div>
+        <div class="card-field">
+          <span class="field-label"><i class="fas fa-calendar-alt"></i> Created At:</span>
+          {{ user.createdAt }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

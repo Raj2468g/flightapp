@@ -1,61 +1,62 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:5000/api/users';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient) {}
 
-  login(username: string, password: string, role: 'admin' | 'user'): Observable<boolean> {
-    return this.http.post<{ success: boolean, userId?: string, error?: string }>(
-      `${this.apiUrl}/auth/login`, 
-      { username, password, role }
-    ).pipe(
-      map(response => {
-        if (response.success && response.userId) {
-          localStorage.setItem('currentUser', JSON.stringify({ _id: response.userId, role }));
-          return true;
-        }
-        throw new Error(response.error || 'Invalid credentials');
+  userLogin(username: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { username, password }).pipe(
+      tap(response => {
+        localStorage.setItem('userId', response.user.username);
+        localStorage.setItem('role', response.user.role);
+        console.log('User login successful:', response.user);
       }),
       catchError(err => {
-        console.error('Login error:', err);
-        return throwError(() => new Error(err.message || 'Login failed'));
+        console.error('User login error:', err);
+        return throwError(() => new Error('Error connecting to server'));
       })
     );
   }
 
-  logout(): void {
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['/user-login']);
+  adminLogin(username: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
+      tap(response => {
+        localStorage.setItem('userId', response.user.username);
+        localStorage.setItem('role', response.user.role);
+        console.log('Admin login successful:', response.user);
+      }),
+      catchError(err => {
+        console.error('Admin login error:', err);
+        return throwError(() => new Error('Error connecting to server'));
+      })
+    );
   }
 
-  getUserId(): string {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (!user._id) {
-      throw new Error('User not logged in');
+  getCurrentUser() {
+    const userId = localStorage.getItem('userId');
+    const role = localStorage.getItem('role');
+    if (userId && role) {
+      return { userId, role };
     }
-    return user._id;
+    return null;
   }
 
-  hasRole(role: string): boolean {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    return user.role === role;
+  getUserId(): string | null {
+    const userId = localStorage.getItem('userId');
+    console.log('AuthService getUserId:', userId);
+    return userId;
   }
 
-  isLoggedIn(): boolean {
-    const user = localStorage.getItem('currentUser');
-    return !!user;
-  }
-
-  getCurrentUser(): { _id: string; role: string } | null {
-    const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
+  logout() {
+    console.log('AuthService logout');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
   }
 }

@@ -1,18 +1,10 @@
-<div class="container">
-  <app-user-nav></app-user-nav>
-  <div class="booking-container">
-    <h2>Book a Ticket</h2>
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-    <div *ngIf="successMessage" class="success">{{ successMessage }}</div>
-    <div class="form-group">
-      <label for="flightSelect">Select Flight:</label>
-      <select id="flightSelect" [(ngModel)]="selectedFlightId" [disabled]="flights.length === 0">
-        <option value="" disabled>Select a flight</option>
-        <option *ngFor="let flight of flights" [value]="flight._id">
-          {{ flight.flightNumber }}: {{ flight.origin }} to {{ flight.destination }} ({{ flight.departureTime | date:'short' }})
-        </option>
-      </select>
-    </div>
-    <button (click)="bookTicket()" class="btn" [disabled]="!userId || !selectedFlightId">Book Ticket</button>
-  </div>
+<div class="book-ticket">
+  <h2>Book a Ticket</h2>
+  <div *ngIf="!userId">Please log in to book a ticket.</div>
+  <ul *ngIf="userId">
+    <li *ngFor="let flight of flights">
+      {{ flight.flightNumber }}: {{ flight.departure}} to {{ flight.destination }} on {{ flight.time | date:'short' }} (Price: ${{ flight.price }})
+      <button (click)="bookFlight(flight._id!)">Book</button>
+    </li>
+  </ul>
 </div>

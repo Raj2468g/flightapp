@@ -1,16 +1,13 @@
-<table>
-    <tr>
-      <th>User Username</th>
-      <th>:</th>
-      <th><input type="text" [(ngModel)]="uname" /></th>
-    </tr>
-    <tr>
-      <th>Password</th>
-      <th>:</th>
-      <th><input type="password" [(ngModel)]="pwd" /></th>
-    </tr>
-    <tr>
-      <th colspan="2"><input type="button" value="Login" (click)="loginCheck()" /></th>
-    </tr>
-  </table>
-  <h1>{{msg}}</h1>
+<div class="login-container">
+  <h2>User Login</h2>
+  <div class="form-group">
+    <label>Username:</label>
+    <input [(ngModel)]="username" required />
+  </div>
+  <div class="form-group">
+    <label>Password:</label>
+    <input type="password" [(ngModel)]="password" required />
+  </div>
+  <button (click)="login()">Login</button>
+  <p *ngIf="error" class="error">{{ error }}</p>
+</div>
