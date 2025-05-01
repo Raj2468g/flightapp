@@ -1,17 +1,4 @@
-.book-ticket {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-button {
-  padding: 8px 16px;
-  margin-left: 10px;
+/* Minimal styles to complement Tailwind */
+.container {
+  min-height: calc(100vh - 80px); /* Adjust for navbar height */
 }

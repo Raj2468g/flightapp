@@ -1,8 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import { User } from '../models/user';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+interface User {
+  _id: string;
+  username: string;
+  role: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: User;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -12,56 +22,41 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  userLogin(username: string, password: string): Observable<{ user: User; token: string }> {
-    return this.http.post<{ user: User; token: string }>(`${this.apiUrl}/login`, { username, password }).pipe(
+  userLogin(username: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/userLogin`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('Storing login response:', response);
         localStorage.setItem('token', response.token);
-      }),
-      catchError(err => {
-        console.error('User login error:', err);
-        return throwError(() => ({
-          message: 'Login failed',
-          details: err.error?.error || err.error?.details || ['Invalid credentials or server error'],
-          status: err.status
-        }));
+        localStorage.setItem('user', JSON.stringify(response.user));
       })
     );
   }
 
-  adminLogin(username: string, password: string): Observable<{ user: User; token: string }> {
-    return this.http.post<{ user: User; token: string }>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
+  adminLogin(username: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('Storing admin login response:', response);
         localStorage.setItem('token', response.token);
-      }),
-      catchError(err => {
-        console.error('Admin login error:', err);
-        return throwError(() => ({
-          message: 'Admin login failed',
-          details: err.error?.error || err.error?.details || ['Invalid credentials or server error'],
-          status: err.status
-        }));
+        localStorage.setItem('user', JSON.stringify(response.user));
       })
     );
-  }
-
-  getCurrentUser(): User | null {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
   }
 
   getUserId(): string | null {
     const user = this.getCurrentUser();
-    return user && user._id !== undefined ? user._id : null;
+    console.log('Retrieved user for getUserId:', user);
+    return user ? user._id : null;
+  }
+
+  getCurrentUser(): User | null {
+    const user = localStorage.getItem('user');
+    console.log('Retrieved user from localStorage:', user);
+    return user ? JSON.parse(user) : null;
   }
 
   logout(): void {
-    localStorage.removeItem('user');
+    console.log('Clearing localStorage');
     localStorage.removeItem('token');
-  }
-
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    localStorage.removeItem('user');
   }
 }

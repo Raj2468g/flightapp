@@ -11,14 +11,18 @@ export class AuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const expectedRole = route.data['role'];
     const user = this.authService.getCurrentUser();
+    const token = localStorage.getItem('token');
 
-    if (!this.authService.isLoggedIn() || !user) {
-      this.router.navigate(['/login']);
+    console.log('AuthGuard check:', { user, token, expectedRole });
+    if (!token || !user) {
+      console.log('No token or user, redirecting to login');
+      this.router.navigate([expectedRole === 'admin' ? '/admin/login' : '/login']);
       return false;
     }
 
     if (user.role !== expectedRole) {
-      this.router.navigate([user.role === 'admin' ? '/admin/dashboard' : '/login']);
+      console.log(`Role mismatch: expected ${expectedRole}, got ${user.role}`);
+      this.router.navigate(['/login']);
       return false;
     }
 

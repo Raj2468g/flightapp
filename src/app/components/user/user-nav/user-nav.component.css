@@ -1,0 +1,10 @@
+/* Additional styles to complement Tailwind */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  a[routerLinkActive] {
+    font-weight: bold;
+  }

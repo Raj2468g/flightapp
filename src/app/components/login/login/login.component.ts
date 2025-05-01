@@ -5,13 +5,13 @@ import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-user-login',
+  selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
-export class UserLoginComponent {
+export class LoginComponent {
   credentials = { username: '', password: '' };
   errors: string[] = [];
   isLoading: boolean = false;
@@ -28,18 +28,17 @@ export class UserLoginComponent {
       return;
     }
 
-    console.log('Attempting login with:', this.credentials);
     this.authService.userLogin(this.credentials.username, this.credentials.password).subscribe({
       next: (response) => {
-        console.log('Login successful:', response);
-        this.router.navigate(['/user']);
+        console.log('User login successful:', response.user);
+        this.router.navigate(['/user/dashboard']);
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Login failed:', err);
+        console.error('User login failed:', err);
         this.errors = Array.isArray(err.details)
           ? err.details
-          : [err.message || 'Login failed. Please check your credentials and try again.'];
+          : [err.message || 'Login failed'];
         this.isLoading = false;
       }
     });
