@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from '../../../services/flight.service';
 import { Flight } from '../../../models/flight';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-manage-flights',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminNavComponent],
   templateUrl: './manage-flights.component.html',
   styleUrls: ['./manage-flights.component.css']
 })
@@ -64,10 +65,10 @@ export class ManageFlightsComponent implements OnInit {
       errors.push('Destination city must be at least 2 characters');
     }
     if (!flight.date || !/^\d{4}-\d{2}-\d{2}$/.test(flight.date)) {
-      errors.push('Date must be in YYYY-MM-DD format');
+      errors.push('Flight date must be in YYYY-MM-DD format');
     }
     if (!flight.time || !/^\d{2}:\d{2}$/.test(flight.time)) {
-      errors.push('Time must be in HH:MM format');
+      errors.push('Flight time must be in HH:MM format');
     }
     if (flight.maxTickets < 1) {
       errors.push('Max tickets must be at least 1');
@@ -75,14 +76,17 @@ export class ManageFlightsComponent implements OnInit {
     if (flight.price <= 0) {
       errors.push('Price must be greater than 0');
     }
-    if (flight.availableTickets < 0 || flight.availableTickets > flight.maxTickets) {
-      errors.push('Available tickets must be between 0 and max tickets');
+    if (this.editingFlight) {
+      if (flight.availableTickets < 0 || flight.availableTickets > flight.maxTickets) {
+        errors.push(`Available tickets must be between 0 and ${flight.maxTickets}`);
+      }
+    } else {
+      flight.availableTickets = flight.maxTickets;
     }
     return errors;
   }
 
   addFlight(): void {
-    this.newFlight.availableTickets = this.newFlight.maxTickets;
     this.errors = this.validateFlight(this.newFlight);
     if (this.errors.length > 0) return;
 

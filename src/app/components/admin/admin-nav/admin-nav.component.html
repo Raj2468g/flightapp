@@ -1,5 +1,40 @@
-<nav class="nav-container">
-    <a routerLink="/admin/flights" class="nav-link">Manage Flights</a>
-    <a routerLink="/admin/bookings" class="nav-link">Manage Bookings</a>
-    <button (click)="logout()" class="logout-btn">Logout</button>
-  </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<nav class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 shadow-lg">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="text-white text-2xl font-bold">
+      <i class="fas fa-plane mr-2"></i> Admin Dashboard
+    </div>
+    <ul class="flex space-x-6">
+      <li>
+        <a routerLink="/admin/manage-users" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-users mr-2"></i> Manage Users
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/manage-flights" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-plane mr-2"></i> Manage Flights
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/manage-bookings" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-ticket-alt mr-2"></i> Manage Bookings
+        </a>
+      </li>
+      <li>
+        <button (click)="logout()" class="text-white hover:bg-red-600 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
+</body>
+</html>

@@ -3,145 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-<div class="manage-flights-container">
-  <h2><i class="fas fa-plane"></i> Manage Flights</h2>
+<app-admin-nav></app-admin-nav>
+<div class="manage-flights-container container mx-auto mt-8 p-4">
+  <h2 class="text-2xl font-bold text-blue-800 mb-4"><i class="fas fa-plane"></i> Manage Flights</h2>
 
   <!-- Error Messages -->
-  <div class="error-messages" *ngIf="errors.length > 0">
+  <div class="error-messages bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" *ngIf="errors.length > 0">
     <p *ngFor="let error of errors" class="error"><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
   </div>
 
   <!-- Loading State -->
-  <div class="loading" *ngIf="isLoading">
+  <div class="loading text-center text-blue-600" *ngIf="isLoading">
     <i class="fas fa-spinner fa-spin"></i> Loading...
   </div>
 
   <!-- Add Flight Form -->
-  <div class="add-flight-form">
-    <h3><i class="fas fa-plus-circle"></i> Add New Flight</h3>
-    <form (ngSubmit)="addFlight()" class="flight-form">
+  <div class="add-flight-form bg-white bg-opacity-20 p-6 rounded-lg shadow-md mb-8">
+    <h3 class="text-xl font-semibold text-blue-700 mb-4"><i class="fas fa-plus-circle"></i> Add New Flight</h3>
+    <form (ngSubmit)="addFlight()" class="flight-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="form-group">
-        <label for="flightNumber"><i class="fas fa-plane"></i> Flight Number</label>
-        <input type="text" id="flightNumber" [(ngModel)]="newFlight.flightNumber" name="flightNumber" required pattern="[A-Z0-9]{3,10}" title="3-10 alphanumeric characters">
+        <label for="flightNumber" class="block text-blue-700 font-medium"><i class="fas fa-plane"></i> Flight Number</label>
+        <input type="text" id="flightNumber" [(ngModel)]="newFlight.flightNumber" name="flightNumber" required pattern="[A-Z0-9]{3,10}" title="3-10 alphanumeric characters" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="departure"><i class="fas fa-plane-departure"></i> Departure</label>
-        <input type="text" id="departure" [(ngModel)]="newFlight.departure" name="departure" required minlength="2">
+        <label for="departure" class="block text-blue-700 font-medium"><i class="fas fa-plane-departure"></i> Departure</label>
+        <input type="text" id="departure" [(ngModel)]="newFlight.departure" name="departure" required minlength="2" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="destination"><i class="fas fa-plane-arrival"></i> Destination</label>
-        <input type="text" id="destination" [(ngModel)]="newFlight.destination" name="destination" required minlength="2">
+        <label for="destination" class="block text-blue-700 font-medium"><i class="fas fa-plane-arrival"></i> Destination</label>
+        <input type="text" id="destination" [(ngModel)]="newFlight.destination" name="destination" required minlength="2" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="date"><i class="fas fa-calendar-alt"></i> Date</label>
-        <input type="date" id="date" [(ngModel)]="newFlight.date" name="date" required>
+        <label for="date" class="block text-blue-700 font-medium"><i class="fas fa-calendar-alt"></i> Date</label>
+        <input type="date" id="date" [(ngModel)]="newFlight.date" name="date" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="time"><i class="fas fa-clock"></i> Time</label>
-        <input type="time" id="time" [(ngModel)]="newFlight.time" name="time" required>
+        <label for="time" class="block text-blue-700 font-medium"><i class="fas fa-clock"></i> Time</label>
+        <input type="time" id="time" [(ngModel)]="newFlight.time" name="time" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="maxTickets"><i class="fas fa-ticket-alt"></i> Max Tickets</label>
-        <input type="number" id="maxTickets" [(ngModel)]="newFlight.maxTickets" name="maxTickets" required min="1">
+        <label for="maxTickets" class="block text-blue-700 font-medium"><i class="fas fa-ticket-alt"></i> Max Tickets</label>
+        <input type="number" id="maxTickets" [(ngModel)]="newFlight.maxTickets" name="maxTickets" required min="1" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
       <div class="form-group">
-        <label for="price"><i class="fas fa-dollar-sign"></i> Price</label>
-        <input type="number" id="price" [(ngModel)]="newFlight.price" name="price" required min="0.01" step="0.01">
+        <label for="price" class="block text-blue-700 font-medium"><i class="fas fa-dollar-sign"></i> Price</label>
+        <input type="number" id="price" [(ngModel)]="newFlight.price" name="price" required min="0.01" step="0.01" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
       </div>
-      <button type="submit" class="btn btn-primary" [disabled]="isLoading"><i class="fas fa-plus"></i> Add Flight</button>
+      <button type="submit" class="btn bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition duration-300 col-span-full" [disabled]="isLoading"><i class="fas fa-plus"></i> Add Flight</button>
     </form>
   </div>
 
   <!-- Flight List -->
-  <div class="flight-grid">
-    <div *ngIf="flights.length === 0 && !isLoading" class="no-flights">
+  <div class="flight-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngIf="flights.length === 0 && !isLoading" class="no-flights text-center text-blue-600 text-lg">
       <i class="fas fa-exclamation-circle"></i> No flights found.
     </div>
-    <div *ngFor="let flight of flights" class="flight-card">
-      <div class="card-header">
-        <span class="flight-number"><i class="fas fa-plane"></i> {{ flight.flightNumber }}</span>
-        <div class="action-buttons">
+    <div *ngFor="let flight of flights" class="flight-card bg-white bg-opacity-20 p-4 rounded-lg shadow-md">
+      <div class="card-header flex justify-between items-center mb-4">
+        <span class="flight-number font-bold text-blue-800"><i class="fas fa-plane"></i> {{ flight.flightNumber }}</span>
+        <div class="action-buttons flex space-x-2">
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <button class="btn btn-success" (click)="saveFlight()" title="Save Changes" [disabled]="isLoading"><i class="fas fa-save"></i></button>
-            <button class="btn btn-secondary" (click)="cancelEdit()" title="Cancel" [disabled]="isLoading"><i class="fas fa-times"></i></button>
+            <button class="btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600" (click)="saveFlight()" title="Save Changes" [disabled]="isLoading"><i class="fas fa-save"></i></button>
+            <button class="btn bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600" (click)="cancelEdit()" title="Cancel" [disabled]="isLoading"><i class="fas fa-times"></i></button>
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
-            <button class="btn btn-primary" (click)="editFlight(flight)" title="Edit Flight" [disabled]="isLoading"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-danger" (click)="deleteFlight(flight._id ?? '')" title="Delete Flight" [disabled]="isLoading"><i class="fas fa-trash"></i></button>
+            <button class="btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" (click)="editFlight(flight)" title="Edit Flight" [disabled]="isLoading"><i class="fas fa-edit"></i></button>
+            <button class="btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" (click)="deleteFlight(flight._id ?? '')" title="Delete Flight" [disabled]="isLoading"><i class="fas fa-trash"></i></button>
           </ng-container>
         </div>
       </div>
-      <div class="card-body">
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-plane"></i> Flight Number:</span>
+      <div class="card-body grid gap-2">
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-plane"></i> Flight Number:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="text" [(ngModel)]="editingFlight!.flightNumber" name="editFlightNumber" required pattern="[A-Z0-9]{3,10}">
+            <input type="text" [(ngModel)]="editingFlight!.flightNumber" name="editFlightNumber" required pattern="[A-Z0-9]{3,10}" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.flightNumber }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-plane-departure"></i> Departure:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-plane-departure"></i> Departure:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="text" [(ngModel)]="editingFlight!.departure" name="editDeparture" required minlength="2">
+            <input type="text" [(ngModel)]="editingFlight!.departure" name="editDeparture" required minlength="2" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.departure }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-plane-arrival"></i> Destination:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-plane-arrival"></i> Destination:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="text" [(ngModel)]="editingFlight!.destination" name="editDestination" required minlength="2">
+            <input type="text" [(ngModel)]="editingFlight!.destination" name="editDestination" required minlength="2" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.destination }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-calendar-alt"></i> Date:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-calendar-alt"></i> Date:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="date" [(ngModel)]="editingFlight!.date" name="editDate" required>
+            <input type="date" [(ngModel)]="editingFlight!.date" name="editDate" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.date }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-clock"></i> Time:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-clock"></i> Time:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="time" [(ngModel)]="editingFlight!.time" name="editTime" required>
+            <input type="time" [(ngModel)]="editingFlight!.time" name="editTime" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.time }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-ticket-alt"></i> Max Tickets:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-ticket-alt"></i> Max Tickets:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="number" [(ngModel)]="editingFlight!.maxTickets" name="editMaxTickets" required min="1">
+            <input type="number" [(ngModel)]="editingFlight!.maxTickets" name="editMaxTickets" required min="1" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.maxTickets }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-dollar-sign"></i> Price:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-dollar-sign"></i> Price:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="number" [(ngModel)]="editingFlight!.price" name="editPrice" required min="0.01" step="0.01">
+            <input type="number" [(ngModel)]="editingFlight!.price" name="editPrice" required min="0.01" step="0.01" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.price }}
           </ng-container>
         </div>
-        <div class="card-field">
-          <span class="field-label"><i class="fas fa-ticket-alt"></i> Available Tickets:</span>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-ticket-alt"></i> Available Tickets:</span>
           <ng-container *ngIf="editingFlight && editingFlight._id === flight._id">
-            <input type="number" [(ngModel)]="editingFlight!.availableTickets" name="editAvailableTickets" required min="0" [max]="editingFlight!.maxTickets">
+            <input type="number" [(ngModel)]="editingFlight!.availableTickets" name="editAvailableTickets" required min="0" [max]="editingFlight!.maxTickets" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
           </ng-container>
           <ng-container *ngIf="!editingFlight || editingFlight._id !== flight._id">
             {{ flight.availableTickets }}

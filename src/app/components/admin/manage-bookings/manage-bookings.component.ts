@@ -7,11 +7,12 @@ import { FlightService } from '../../../services/flight.service';
 import { Booking } from '../../../models/booking';
 import { User } from '../../../models/user';
 import { Flight } from '../../../models/flight';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-manage-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminNavComponent],
   templateUrl: './manage-bookings.component.html',
   styleUrls: ['./manage-bookings.component.css']
 })
@@ -103,6 +104,18 @@ export class ManageBookingsComponent implements OnInit {
     return errors;
   }
 
+  updateSeatNumbers(): void {
+    const seats = this.editingBooking ? this.editingBooking.seats : this.newBooking.seats;
+    const seatNumber = this.editingBooking ? this.editingBooking.seatNumber : this.newBooking.seatNumber;
+    if (seats > seatNumber.length) {
+      for (let i = seatNumber.length; i < seats; i++) {
+        seatNumber.push('');
+      }
+    } else {
+      seatNumber.length = seats;
+    }
+  }
+
   addBooking(): void {
     this.errors = this.validateBooking(this.newBooking);
     if (this.errors.length > 0) return;
@@ -157,13 +170,13 @@ export class ManageBookingsComponent implements OnInit {
       next: (updatedBooking) => {
         const index = this.bookings.findIndex(b => b._id === updatedBooking._id);
         if (index !== -1) {
+          const oldBooking = this.bookings[index];
           this.bookings[index] = updatedBooking;
-        }
-        const oldBooking = this.bookings[index];
-        const seatDiff = updatedBooking.seats - oldBooking.seats;
-        const flight = this.flights.find(f => f._id === updatedBooking.flightId);
-        if (flight) {
-          flight.availableTickets -= seatDiff;
+          const seatDiff = updatedBooking.seats - oldBooking.seats;
+          const flight = this.flights.find(f => f._id === updatedBooking.flightId);
+          if (flight) {
+            flight.availableTickets -= seatDiff;
+          }
         }
         this.editingBooking = null;
         console.log('Booking updated:', updatedBooking);
@@ -212,12 +225,5 @@ export class ManageBookingsComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  }
-
-  updateSeatNumbers(): void {
-    const booking = this.editingBooking || this.newBooking;
-    if (booking.seats !== booking.seatNumber.length) {
-      booking.seatNumber = Array(booking.seats).fill('').map((_, i) => booking.seatNumber[i] || `A${i + 1}`);
-    }
   }
 }

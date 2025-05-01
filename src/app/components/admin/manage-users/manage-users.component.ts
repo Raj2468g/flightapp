@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../models/user';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminNavComponent],
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.css']
 })
@@ -19,7 +20,8 @@ export class ManageUsersComponent implements OnInit {
     password: '',
     phone: '',
     gender: '',
-    role: 'user'
+    role: 'user',
+    createdAt: new Date().toISOString()
   };
   editingUser: User | null = null;
   errors: string[] = [];
@@ -50,28 +52,25 @@ export class ManageUsersComponent implements OnInit {
     });
   }
 
-  validateUser(user: User, isUpdate: boolean = false): string[] {
+  validateUser(user: User): string[] {
     const errors: string[] = [];
-    if (!user.username || !/^[a-zA-Z0-9]{4,20}$/.test(user.username)) {
-      errors.push('Username must be 4-20 alphanumeric characters');
+    if (!user.username || user.username.length < 4 || user.username.length > 20) {
+      errors.push('Username must be 4-20 characters long');
     }
-    if (!user.email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(user.email)) {
-      errors.push('Invalid email format');
+    if (!user.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+      errors.push('Valid email is required');
     }
-    if (!isUpdate && (!user.password || user.password.length < 6)) {
-      errors.push('Password must be at least 6 characters');
+    if (!this.editingUser && (!user.password || user.password.length < 6)) {
+      errors.push('Password must be at least 6 characters long');
     }
-    if (isUpdate && user.password && user.password.length < 6) {
-      errors.push('New password must be at least 6 characters');
-    }
-    if (user.phone && !/^\+?[1-9]\d{1,14}$/.test(user.phone)) {
-      errors.push('Invalid phone number format');
+    if (user.phone && !/\+?[1-9]\d{1,14}/.test(user.phone)) {
+      errors.push('Valid phone number is required');
     }
     if (user.gender && !['male', 'female', 'other'].includes(user.gender)) {
       errors.push('Gender must be male, female, or other');
     }
-    if (user.role !== 'user' && user.role !== 'admin') {
-      errors.push('Role must be "user" or "admin"');
+    if (!user.role || !['user', 'admin'].includes(user.role)) {
+      errors.push('Role must be user or admin');
     }
     return errors;
   }
@@ -91,7 +90,8 @@ export class ManageUsersComponent implements OnInit {
           password: '',
           phone: '',
           gender: '',
-          role: 'user'
+          role: 'user',
+          createdAt: new Date().toISOString()
         };
         console.log('User added:', user);
         alert('User added successfully');
@@ -115,7 +115,7 @@ export class ManageUsersComponent implements OnInit {
   saveUser(): void {
     if (!this.editingUser) return;
 
-    this.errors = this.validateUser(this.editingUser, true);
+    this.errors = this.validateUser(this.editingUser);
     if (this.errors.length > 0) return;
 
     this.isLoading = true;

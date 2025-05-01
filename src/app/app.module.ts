@@ -19,9 +19,7 @@ import { RegistrationComponent } from './components/user/registration/registrati
 
 @NgModule({
   declarations: [
-    AppComponent,
-
-    AdminNavComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
@@ -37,7 +35,8 @@ import { RegistrationComponent } from './components/user/registration/registrati
     ManageBookingsComponent,
     UserDashboardComponent,
     BookTicketComponent,
-    AppRoutingModule
+    AppRoutingModule,
+    AdminNavComponent
   ],
   providers: [AuthGuard],
   bootstrap: [AppComponent]
