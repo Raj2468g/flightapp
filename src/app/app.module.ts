@@ -16,30 +16,28 @@ import { ManageUsersComponent } from './components/admin/manage-users/manage-use
 import { HomeComponent } from './components/home/home.component';
 import { AboutComponent } from './components/about/about.component';
 import { NavBarComponent } from './components/nav-bar/nav-bar/nav-bar.component';
-
 @NgModule({
   declarations: [
     AppComponent,
+ 
     UserDashboardComponent
-    
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
-    FormsModule,
+    UserLoginComponent,
     AdminLoginComponent,
+    FormsModule,
     AppRoutingModule,
     AdminDashboardComponent,
     RegistrationComponent,
     BookTicketComponent,
-    UserLoginComponent,
     ManageFlightsComponent,
     ManageTicketsComponent,
     ManageUsersComponent,
     HomeComponent,
     AboutComponent,
     NavBarComponent,
-    
   ],
   bootstrap: [AppComponent]
 })

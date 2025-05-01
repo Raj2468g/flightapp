@@ -19,13 +19,15 @@ export class UserLoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   login(): void {
+    this.error = ''; // Reset error
     this.authService.userLogin(this.username, this.password).subscribe({
       next: () => {
+        console.log('User login successful, navigating to /user');
         this.router.navigate(['/user']);
       },
       error: (err) => {
-        this.error = 'Error connecting to server: ' + (err.message || 'Unknown error');
         console.error('User login failed:', err);
+        this.error = err.error?.error || 'Error connecting to server. Please check if the backend is running.';
       }
     });
   }

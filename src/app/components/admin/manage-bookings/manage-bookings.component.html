@@ -26,29 +26,29 @@
     </div>
     <div class="form-group">
       <label class="field-label"><i class="fas fa-couch"></i> Seat Numbers:</label>
-      <input type="text" [(ngModel)]="seatNumberInput" placeholder="e.g., 12A,12B" required />
+      <input type="text" [(ngModel)]="newBooking.seatNumber" placeholder="e.g., 12A,12B" required />
     </div>
     <div class="form-group">
       <label class="field-label"><i class="fas fa-calendar"></i> Booking Date:</label>
       <input type="date" [(ngModel)]="newBooking.bookingDate" required />
     </div>
-    <button class="btn btn-primary" (click)="addBooking()" [disabled]="!newBooking.flightId || !newBooking.userId || !newBooking.seats || !seatNumberInput || !newBooking.bookingDate">
+    <button class="btn btn-primary" (click)="addBooking()" [disabled]="!newBooking.flightId || !newBooking.userId || !newBooking.seats || !newBooking.seatNumber || !newBooking.bookingDate">
       Add Booking
     </button>
   </div>
 
-  <div class="bookings-list" *ngIf="bookings.length; else noBookings">
+  <div class="bookings-list">
     <div class="booking-card" *ngFor="let booking of bookings; let i = index">
       <div class="card-header">
         <h3><i class="fas fa-ticket-alt"></i> Booking #{{ booking._id }}</h3>
       </div>
       <div class="card-body" *ngIf="editIndex !== i">
-        <p><span class="field-label"><i class="fas fa-plane"></i> Flight:</span> {{ booking.flightNumber || 'N/A' }}</p>
-        <p><span class="field-label"><i class="fas fa-user"></i> User:</span> {{ booking.username || 'N/A' }}</p>
-        <p><span class="field-label"><i class="fas fa-chair"></i> Seats:</span> {{ booking.seats || 'N/A' }}</p>
-        <p><span class="field-label"><i class="fas fa-couch"></i> Seat Numbers:</span> {{ booking.seatNumber?.length ? booking.seatNumber.join(', ') : 'N/A' }}</p>
-        <p><span class="field-label"><i class="fas fa-dollar-sign"></i> Total Price:</span> <span class="price-display">${{ booking.totalPrice || 'N/A' }}</span></p>
-        <p><span class="field-label"><i class="fas fa-calendar"></i> Booking Date:</span> {{ booking.bookingDate || 'N/A' }}</p>
+        <p><span class="field-label"><i class="fas fa-plane"></i> Flight:</span> {{ booking.flightNumber }}</p>
+        <p><span class="field-label"><i class="fas fa-user"></i> User:</span> {{ booking.username }}</p>
+        <p><span class="field-label"><i class="fas fa-chair"></i> Seats:</span> {{ booking.seats }}</p>
+        <p><span class="field-label"><i class="fas fa-couch"></i> Seat Numbers:</span> {{ booking.seatNumber.join(', ') }}</p>
+        <p><span class="field-label"><i class="fas fa-dollar-sign"></i> Total Price:</span> <span class="price-display">${{ booking.totalPrice }}</span></p>
+        <p><span class="field-label"><i class="fas fa-calendar"></i> Booking Date:</span> {{ booking.bookingDate }}</p>
         <button class="btn btn-edit" (click)="startEdit(booking, i)"><i class="fas fa-edit"></i> Edit</button>
         <button class="btn btn-delete" (click)="deleteBooking(booking._id!, i)"><i class="fas fa-trash"></i> Delete</button>
       </div>
@@ -77,14 +77,11 @@
         </div>
         <div class="form-group">
           <label class="field-label"><i class="fas fa-couch"></i> Seat Numbers:</label>
-          <input type="text" [(ngModel)]="editSeatNumberInput" placeholder="e.g., 12A,12B" required />
+          <input type="text" [(ngModel)]="editBooking!.seatNumber" required />
         </div>
         <button class="btn btn-save" (click)="saveEdit()"><i class="fas fa-save"></i> Save</button>
         <button class="btn btn-cancel" (click)="cancelEdit()"><i class="fas fa-times"></i> Cancel</button>
       </div>
     </div>
   </div>
-  <ng-template #noBookings>
-    <p class="no-bookings">No bookings available</p>
-  </ng-template>
 </div>

@@ -67,7 +67,7 @@
           </ng-container>
           <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
             <button class="btn btn-primary" (click)="editUser(user)" title="Edit User"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-danger" (click)="user._id && deleteUser(user._id)" title="Delete User"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-danger" (click)="deleteUser(user._id ?? '')" title="Delete User"><i class="fas fa-trash"></i></button>
           </ng-container>
         </div>
       </div>

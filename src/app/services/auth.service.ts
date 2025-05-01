@@ -14,13 +14,17 @@ export class AuthService {
   userLogin(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('userId', response.user.username);
-        localStorage.setItem('role', response.user.role);
-        console.log('User login successful:', response.user);
+        if (response.user) {
+          localStorage.setItem('userId', response.user.username);
+          localStorage.setItem('role', response.user.role);
+          console.log('User login successful:', response.user);
+        } else {
+          throw new Error('Invalid response from server');
+        }
       }),
       catchError(err => {
         console.error('User login error:', err);
-        return throwError(() => new Error('Error connecting to server'));
+        return throwError(() => err);
       })
     );
   }
@@ -28,13 +32,17 @@ export class AuthService {
   adminLogin(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
       tap(response => {
-        localStorage.setItem('userId', response.user.username);
-        localStorage.setItem('role', response.user.role);
-        console.log('Admin login successful:', response.user);
+        if (response.user) {
+          localStorage.setItem('userId', response.user.username);
+          localStorage.setItem('role', response.user.role);
+          console.log('Admin login successful:', response.user);
+        } else {
+          throw new Error('Invalid response from server');
+        }
       }),
       catchError(err => {
         console.error('Admin login error:', err);
-        return throwError(() => new Error('Error connecting to server'));
+        return throwError(() => err);
       })
     );
   }

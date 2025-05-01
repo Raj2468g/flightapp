@@ -10,10 +10,10 @@ import { User } from '../../../models/user';
 
 @Component({
   selector: 'app-manage-bookings',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './manage-bookings.component.html',
-  styleUrls: ['./manage-bookings.component.css']
+  styleUrls: ['./manage-bookings.component.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class ManageBookingsComponent implements OnInit {
   bookings: Booking[] = [];
@@ -29,9 +29,7 @@ export class ManageBookingsComponent implements OnInit {
     totalPrice: 0,
     bookingDate: new Date().toISOString().split('T')[0]
   };
-  seatNumberInput: string = '';
   editBooking: Booking | null = null;
-  editSeatNumberInput: string = '';
   editIndex: number | null = null;
 
   constructor(
@@ -49,15 +47,12 @@ export class ManageBookingsComponent implements OnInit {
   loadBookings(): void {
     this.bookingService.getBookings().subscribe({
       next: (bookings: Booking[]) => {
-        this.bookings = bookings.map(booking => ({
-          ...booking,
-          seatNumber: Array.isArray(booking.seatNumber) ? booking.seatNumber : []
-        }));
-        console.log('Bookings loaded:', this.bookings);
+        this.bookings = bookings;
+        console.log('Bookings loaded:', bookings);
       },
       error: (err: any) => {
         console.error('Error loading bookings:', err);
-        alert('Failed to load bookings: ' + (err.message || 'Unknown error'));
+        alert('Failed to load bookings');
       }
     });
   }
@@ -97,7 +92,7 @@ export class ManageBookingsComponent implements OnInit {
       alert('Selected user not found');
       return;
     }
-    const seatNumbers = this.seatNumberInput.split(',').map(s => s.trim()).filter(s => s);
+    const seatNumbers = this.newBooking.seatNumber.join(',').split(',').map(s => s.trim());
     if (seatNumbers.length !== this.newBooking.seats) {
       alert(`Please provide exactly ${this.newBooking.seats} seat numbers`);
       return;
@@ -124,7 +119,6 @@ export class ManageBookingsComponent implements OnInit {
 
   startEdit(booking: Booking, index: number): void {
     this.editBooking = { ...booking };
-    this.editSeatNumberInput = booking.seatNumber.join(', ');
     this.editIndex = index;
   }
 
@@ -140,7 +134,7 @@ export class ManageBookingsComponent implements OnInit {
       alert('Selected user not found');
       return;
     }
-    const seatNumbers = this.editSeatNumberInput.split(',').map(s => s.trim()).filter(s => s);
+    const seatNumbers = this.editBooking.seatNumber.join(',').split(',').map(s => s.trim());
     if (seatNumbers.length !== this.editBooking.seats) {
       alert(`Please provide exactly ${this.editBooking.seats} seat numbers`);
       return;
@@ -167,7 +161,6 @@ export class ManageBookingsComponent implements OnInit {
 
   cancelEdit(): void {
     this.editBooking = null;
-    this.editSeatNumberInput = '';
     this.editIndex = null;
   }
 
@@ -195,6 +188,5 @@ export class ManageBookingsComponent implements OnInit {
       totalPrice: 0,
       bookingDate: new Date().toISOString().split('T')[0]
     };
-    this.seatNumberInput = '';
   }
 }

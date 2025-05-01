@@ -24,7 +24,7 @@ export class AdminLoginComponent {
         this.router.navigate(['/admin/manage-bookings']);
       },
       error: (err) => {
-        this.error = 'Error connecting to server: ' + (err.message || 'Unknown error');
+        this.error = err.error?.error || 'Error connecting to server';
         console.error('Admin login failed:', err);
       }
     });

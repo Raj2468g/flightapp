@@ -1,8 +1,8 @@
 export interface Booking {
   _id?: string;
-  flightId: string; // flightNumber, e.g., 'AA123'
+  flightId: string;
   flightNumber: string;
-  userId: string; // username, e.g., '18960'
+  userId: string;
   username: string;
   seats: number;
   seatNumber: string[];
