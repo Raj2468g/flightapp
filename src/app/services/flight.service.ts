@@ -7,7 +7,7 @@ import { Flight } from '../models/flight';
   providedIn: 'root'
 })
 export class FlightService {
-  private apiUrl = 'http://localhost:3000/api/flights';
+  private apiUrl = 'http://localhost:5000/api/flights';
 
   constructor(private http: HttpClient) {}
 

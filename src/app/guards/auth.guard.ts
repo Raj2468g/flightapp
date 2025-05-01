@@ -1,23 +1,35 @@
 import { Injectable } from '@angular/core';
-     import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
-     import { AuthService } from '../services/auth.service';
+import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
-     @Injectable({
-       providedIn: 'root'
-     })
-     export class AuthGuard implements CanActivate {
-       constructor(private authService: AuthService, private router: Router) {}
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthGuard implements CanActivate {
+  constructor(private authService: AuthService, private router: Router) {}
 
-       canActivate(route: ActivatedRouteSnapshot): boolean {
-         if (!this.authService.isLoggedIn()) {
-           this.router.navigate(['/user-login']);
-           return false;
-         }
-         const expectedRole = route.data['role'];
-         if (!this.authService.hasRole(expectedRole)) {
-           this.router.navigate([this.authService.hasRole('admin') ? '/admin/dashboard' : '/user/dashboard']);
-           return false;
-         }
-         return true;
-       }
-     }
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    const user = this.authService.getCurrentUser();
+    const targetPath = state.url; // Get the target route's URL
+
+    console.log('AuthGuard check:', { user, targetPath });
+
+    if (user) {
+      if (targetPath.includes('admin') && user.role.toLowerCase() === 'admin') {
+        console.log('AuthGuard: Allowing admin access');
+        return true;
+      } else if (targetPath.includes('user') && user.role.toLowerCase() === 'user') {
+        console.log('AuthGuard: Allowing user access');
+        return true;
+      } else {
+        console.log('AuthGuard: Role mismatch for path', targetPath);
+        this.router.navigate(['/login']);
+        return false;
+      }
+    }
+
+    console.log('AuthGuard: No user');
+    this.router.navigate(['/login']);
+    return false;
+  }
+}

@@ -1,29 +1,29 @@
 import { Injectable } from '@angular/core';
-     import { HttpClient } from '@angular/common/http';
-     import { Observable } from 'rxjs';
-     import { Booking } from '../models/booking';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Booking } from '../models/booking';
 
-     @Injectable({
-       providedIn: 'root'
-     })
-     export class BookingService {
-       private apiUrl = 'http://localhost:3000/api/bookings';
+@Injectable({
+  providedIn: 'root'
+})
+export class BookingService {
+  private apiUrl = 'http://localhost:5000/api/bookings';
 
-       constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-       getBookings(userId?: string): Observable<Booking[]> {
-         const url = userId ? `${this.apiUrl}?userId=${userId}` : this.apiUrl; console.log("Hit");
-         return this.http.get<Booking[]>(url);
-       }
+  getBookings(): Observable<Booking[]> {
+    return this.http.get<Booking[]>(this.apiUrl);
+  }
 
-       addBooking(booking: Booking): Observable<Booking> {
-         return this.http.post<Booking>(this.apiUrl, booking);
-       }
+  addBooking(booking: Booking): Observable<Booking> {
+    return this.http.post<Booking>(this.apiUrl, booking);
+  }
 
-       deleteBooking(id: string): Observable<any> {
-         return this.http.delete(`${this.apiUrl}/${id}`);
-       }
-       bookTicket(booking: { userId: string; flightId: string; bookingDate: string }): Observable<any> {
-        return this.http.post<any>(this.apiUrl, booking);
-      }
-     }
+  updateBooking(id: string, booking: Booking): Observable<Booking> {
+    return this.http.put<Booking>(`${this.apiUrl}/${id}`, booking);
+  }
+
+  deleteBooking(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}

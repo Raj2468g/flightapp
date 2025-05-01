@@ -1,10 +1,9 @@
-<div class="admin-dashboard">
-  <h1>Admin Dashboard</h1>
-  <p>Welcome, Admin!</p>
+<div class="admin-dashboard-container">
+  <h2>Admin Dashboard</h2>
   <nav class="admin-nav">
-    <a routerLink="/admin/flights" class="nav-link">Manage Flights</a>
-    <a routerLink="/admin/bookings" class="nav-link">Manage Bookings</a>
-    <button (click)="logout()" class="logout-button">Logout</button>
+    <a routerLink="/admin/manage-flights">Manage Flights</a>
+    <a routerLink="/admin/manage-tickets">Manage Tickets</a>
+    <a routerLink="/admin/manage-users">Manage Users</a>
   </nav>
   <router-outlet></router-outlet>
-  
+</div>

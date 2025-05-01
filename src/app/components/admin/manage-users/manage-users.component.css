@@ -1,5 +1,5 @@
-/* General Container */
-.manage-flights-container {
+
+.manage-users-container {
   max-width: 1300px;
   margin: 30px auto;
   padding: 30px;
@@ -11,7 +11,7 @@
   overflow: hidden;
 }
 
-.manage-flights-container::before {
+.manage-users-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -34,8 +34,8 @@ h2 {
   gap: 10px;
 }
 
-/* Add Flight Form */
-.add-flight-form {
+/* Add User Form */
+.add-user-form {
   background: rgba(255, 255, 255, 0.95);
   padding: 25px;
   border-radius: 12px;
@@ -44,7 +44,7 @@ h2 {
   margin-bottom: 40px;
 }
 
-.add-flight-form h3 {
+.add-user-form h3 {
   color: #1e40af;
   font-size: 1.75rem;
   font-weight: 500;
@@ -54,7 +54,7 @@ h2 {
   gap: 8px;
 }
 
-.flight-form {
+.user-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
@@ -75,7 +75,7 @@ h2 {
   gap: 6px;
 }
 
-.form-group input {
+.form-group input, .form-group select {
   padding: 12px;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
@@ -85,14 +85,14 @@ h2 {
   transition: all 0.3s ease;
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
   background: #ffffff;
 }
 
-.form-group input:hover {
+.form-group input:hover, .form-group select:hover {
   border-color: #2563eb;
 }
 
@@ -179,15 +179,15 @@ h2 {
   box-shadow: 0 6px 16px rgba(107, 114, 128, 0.5);
 }
 
-/* Flight Grid */
-.flight-grid {
+/* User Grid */
+.user-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
 
-.flight-card {
+.user-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(237, 233, 254, 0.9));
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 0 6px rgba(255, 255, 255, 0.6);
@@ -196,7 +196,7 @@ h2 {
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
-.flight-card:hover {
+.user-card:hover {
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.8);
   background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(221, 214, 254, 1));
@@ -208,16 +208,6 @@ h2 {
   50% { box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 0 12px rgba(59, 130, 246, 0.9); }
 }
 
-.flight-card.upcoming {
-  border-left: 5px solid #10b981;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(209, 250, 229, 0.9));
-}
-
-.flight-card.past {
-  border-left: 5px solid #6b7280;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(243, 244, 246, 0.9));
-}
-
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -225,7 +215,7 @@ h2 {
   margin-bottom: 12px;
 }
 
-.flight-number {
+.user-username {
   font-weight: 700;
   font-size: 1.2rem;
   color: #1e40af;
@@ -234,58 +224,26 @@ h2 {
   gap: 8px;
 }
 
-.status-icon {
-  color: #10b981;
-  font-size: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.flight-card:hover .status-icon.fa-plane {
-  transform: rotate(45deg);
-}
-
-.status-icon.fa-check-circle {
-  color: #6b7280;
-}
-
 .card-body {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Reduced gap for more fields */
+  gap: 8px;
 }
 
 .card-field {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.9rem; /* Slightly smaller font for compactness */
+  font-size: 0.9rem;
 }
 
 .field-label {
   font-weight: 500;
   color: #1e40af;
-  min-width: 120px; /* Adjusted for longer labels */
+  min-width: 120px;
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.time-display {
-  color: #6b7280;
-  font-style: italic;
-  font-size: 0.9rem;
-}
-
-.time-display:not(:empty) {
-  color: #10b981;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.price-display {
-  color: #d97706;
-  font-weight: 600;
-  font-size: 0.9rem;
 }
 
 .action-buttons {
@@ -293,7 +251,7 @@ h2 {
   gap: 8px;
 }
 
-.flight-card input {
+.user-card input, .user-card select {
   padding: 8px;
   border: 1px solid #bfdbfe;
   border-radius: 6px;
@@ -303,14 +261,14 @@ h2 {
   transition: all 0.3s ease;
 }
 
-.flight-card input:focus {
+.user-card input:focus, .user-card select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
   background: #ffffff;
 }
 
-.no-flights {
+.no-users {
   text-align: center;
   color: #6b7280;
   font-size: 1.2rem;
@@ -326,24 +284,24 @@ h2 {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .manage-flights-container {
+  .manage-users-container {
     margin: 15px;
     padding: 20px;
   }
 
-  .flight-form {
+  .user-form {
     grid-template-columns: 1fr;
   }
 
-  .add-flight-form {
+  .add-user-form {
     padding: 20px;
   }
 
-  .flight-grid {
+  .user-grid {
     grid-template-columns: 1fr;
   }
 
-  .flight-card {
+  .user-card {
     padding: 12px;
   }
 
@@ -365,7 +323,7 @@ h2 {
     font-size: 2rem;
   }
 
-  .add-flight-form h3 {
+  .add-user-form h3 {
     font-size: 1.5rem;
   }
 }
@@ -377,7 +335,7 @@ h2 {
     min-width: 32px;
   }
 
-  .flight-number {
+  .user-username {
     font-size: 1.1rem;
   }
 
@@ -390,15 +348,7 @@ h2 {
     font-size: 0.85rem;
   }
 
-  .time-display, .price-display {
-    font-size: 0.85rem;
-  }
-
-  .no-flights {
+  .no-users {
     font-size: 1rem;
-  }
-
-  .status-icon {
-    font-size: 0.9rem;
   }
 }

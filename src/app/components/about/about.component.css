@@ -1,0 +1,16 @@
+.about-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    color: #007bff;
+  }
+  a {
+    color: #007bff;
+    text-decoration: underline;
+  }
+  a:hover {
+    color: #0056b3;
+  }

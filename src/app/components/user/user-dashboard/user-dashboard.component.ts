@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   selector: 'app-user-dashboard',
   templateUrl: './user-dashboard.component.html',
   styleUrls: ['./user-dashboard.component.css'],
-  standalone: false
+  standalone:false
 })
 export class UserDashboardComponent implements OnInit {
   flights: Flight[] = [];
@@ -21,6 +21,7 @@ export class UserDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('UserDashboardComponent ngOnInit');
     this.loadUser();
     this.loadFlights();
   }
@@ -28,7 +29,7 @@ export class UserDashboardComponent implements OnInit {
   private loadUser() {
     try {
       const user = this.authService.getCurrentUser();
-      this.currentUserName = user?._id || 'Guest';
+      this.currentUserName = user?.userId || 'Guest';
       console.log('Current user:', user);
     } catch (err) {
       console.error('Error loading user:', err);
@@ -50,7 +51,8 @@ export class UserDashboardComponent implements OnInit {
   }
 
   logout() {
+    console.log('UserDashboardComponent logout');
     this.authService.logout();
-    this.router.navigate(['/user-login']);
+    this.router.navigate(['/login']);
   }
 }
