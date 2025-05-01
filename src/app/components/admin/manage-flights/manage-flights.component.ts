@@ -13,17 +13,19 @@ import { Flight } from '../../../models/flight';
 })
 export class ManageFlightsComponent implements OnInit {
   flights: Flight[] = [];
-  newFlight: Flight = { 
-    flightNumber: '', 
-    departure: '', 
-    destination: '', 
-    date: '', 
-    time: '', 
-    maxTickets: 0, 
-    price: 0, 
-    availableTickets: 0 
+  newFlight: Flight = {
+    flightNumber: '',
+    departure: '',
+    destination: '',
+    date: '',
+    time: '',
+    maxTickets: 0,
+    price: 0,
+    availableTickets: 0
   };
   editingFlight: Flight | null = null;
+  errors: string[] = [];
+  isLoading: boolean = false;
 
   constructor(private flightService: FlightService) {}
 
@@ -32,81 +34,144 @@ export class ManageFlightsComponent implements OnInit {
   }
 
   loadFlights(): void {
+    this.isLoading = true;
+    this.errors = [];
     this.flightService.getFlights().subscribe({
-      next: (flights: Flight[]) => {
+      next: (flights) => {
         this.flights = flights;
         console.log('Flights loaded:', flights);
+        this.isLoading = false;
       },
-      error: (err: any) => console.error('Error loading flights:', err)
+      error: (err) => {
+        console.error('Error loading flights:', err);
+        this.errors = Array.isArray(err.details)
+          ? err.details
+          : [err.message || `Failed to load flights. Server responded with status ${err.status || 'unknown'}.`];
+        this.isLoading = false;
+      }
     });
   }
 
+  validateFlight(flight: Flight): string[] {
+    const errors: string[] = [];
+    if (!flight.flightNumber || !/^[A-Z0-9]{3,10}$/.test(flight.flightNumber)) {
+      errors.push('Flight number must be 3-10 alphanumeric characters');
+    }
+    if (!flight.departure || flight.departure.length < 2) {
+      errors.push('Departure city must be at least 2 characters');
+    }
+    if (!flight.destination || flight.destination.length < 2) {
+      errors.push('Destination city must be at least 2 characters');
+    }
+    if (!flight.date || !/^\d{4}-\d{2}-\d{2}$/.test(flight.date)) {
+      errors.push('Date must be in YYYY-MM-DD format');
+    }
+    if (!flight.time || !/^\d{2}:\d{2}$/.test(flight.time)) {
+      errors.push('Time must be in HH:MM format');
+    }
+    if (flight.maxTickets < 1) {
+      errors.push('Max tickets must be at least 1');
+    }
+    if (flight.price <= 0) {
+      errors.push('Price must be greater than 0');
+    }
+    if (flight.availableTickets < 0 || flight.availableTickets > flight.maxTickets) {
+      errors.push('Available tickets must be between 0 and max tickets');
+    }
+    return errors;
+  }
+
   addFlight(): void {
+    this.newFlight.availableTickets = this.newFlight.maxTickets;
+    this.errors = this.validateFlight(this.newFlight);
+    if (this.errors.length > 0) return;
+
+    this.isLoading = true;
     console.log('Adding flight:', this.newFlight);
-    const flightToAdd = { ...this.newFlight, availableTickets: this.newFlight.maxTickets };
-    this.flightService.addFlight(flightToAdd).subscribe({
-      next: (flight: Flight) => {
+    this.flightService.addFlight(this.newFlight).subscribe({
+      next: (flight) => {
         this.flights.push(flight);
-        this.newFlight = { 
-          flightNumber: '', 
-          departure: '', 
-          destination: '', 
-          date: '', 
-          time: '', 
-          maxTickets: 0, 
-          price: 0, 
-          availableTickets: 0 
+        this.newFlight = {
+          flightNumber: '',
+          departure: '',
+          destination: '',
+          date: '',
+          time: '',
+          maxTickets: 0,
+          price: 0,
+          availableTickets: 0
         };
         console.log('Flight added:', flight);
         alert('Flight added successfully');
+        this.isLoading = false;
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Error adding flight:', err);
-        alert('Failed to add flight');
+        this.errors = Array.isArray(err.details)
+          ? err.details
+          : [err.message || `Failed to add flight. Server responded with status ${err.status || 'unknown'}.`];
+        this.isLoading = false;
       }
     });
   }
 
   editFlight(flight: Flight): void {
     this.editingFlight = { ...flight };
+    this.errors = [];
   }
 
   saveFlight(): void {
-    if (this.editingFlight) {
-      console.log('Saving flight:', this.editingFlight);
-      this.flightService.updateFlight(this.editingFlight).subscribe({
-        next: (updatedFlight: Flight) => {
-          const index = this.flights.findIndex(f => f._id === updatedFlight._id);
-          if (index !== -1) {
-            this.flights[index] = updatedFlight;
-          }
-          this.editingFlight = null;
-          console.log('Flight updated:', updatedFlight);
-          alert('Flight updated successfully');
-        },
-        error: (err: any) => {
-          console.error('Error updating flight:', err);
-          alert('Failed to update flight');
+    if (!this.editingFlight) return;
+
+    this.errors = this.validateFlight(this.editingFlight);
+    if (this.errors.length > 0) return;
+
+    this.isLoading = true;
+    console.log('Saving flight:', this.editingFlight);
+    this.flightService.updateFlight(this.editingFlight).subscribe({
+      next: (updatedFlight) => {
+        const index = this.flights.findIndex(f => f._id === updatedFlight._id);
+        if (index !== -1) {
+          this.flights[index] = updatedFlight;
         }
-      });
-    }
+        this.editingFlight = null;
+        console.log('Flight updated:', updatedFlight);
+        alert('Flight updated successfully');
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error updating flight:', err);
+        this.errors = Array.isArray(err.details)
+          ? err.details
+          : [err.message || `Failed to update flight. Server responded with status ${err.status || 'unknown'}.`];
+        this.isLoading = false;
+      }
+    });
   }
 
   cancelEdit(): void {
     this.editingFlight = null;
+    this.errors = [];
   }
 
   deleteFlight(id: string): void {
+    if (!confirm('Are you sure you want to delete this flight?')) return;
+
+    this.isLoading = true;
     console.log('Deleting flight ID:', id);
     this.flightService.deleteFlight(id).subscribe({
       next: () => {
         this.flights = this.flights.filter(f => f._id !== id);
         console.log('Flight deleted:', id);
         alert('Flight deleted successfully');
+        this.isLoading = false;
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Error deleting flight:', err);
-        alert('Failed to delete flight');
+        this.errors = Array.isArray(err.details)
+          ? err.details
+          : [err.message || `Failed to delete flight. Server responded with status ${err.status || 'unknown'}.`];
+        this.isLoading = false;
       }
     });
   }

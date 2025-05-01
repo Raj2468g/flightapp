@@ -1,12 +1,32 @@
 <div class="dashboard-container">
-  <h2>User Dashboard</h2>
-  <p>Welcome, {{ currentUserName }}!</p>
+  <h2>Welcome, {{ username }}!</h2>
+  <h3>Your Bookings</h3>
+  <div class="bookings-table" *ngIf="bookings.length; else noBookings">
+    <table>
+      <thead>
+        <tr>
+          <th>Flight Number</th>
+          <th>Username</th>
+          <th>Seats</th>
+          <th>Seat Numbers</th>
+          <th>Total Price</th>
+          <th>Booking Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let booking of bookings">
+          <td>{{ booking.flightNumber }}</td>
+          <td>{{ booking.username }}</td>
+          <td>{{ booking.seats }}</td>
+          <td>{{ booking.seatNumber.join(', ') }}</td>
+          <td>{{ booking.totalPrice }}</td>
+          <td>{{ booking.bookingDate }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noBookings>
+    <p>No bookings found.</p>
+  </ng-template>
   <button (click)="logout()">Logout</button>
-  <h3>Available Flights</h3>
-  <div *ngIf="flights.length === 0">No flights available.</div>
-  <ul>
-    <li *ngFor="let flight of flights">
-      {{ flight.flightNumber }}: {{ flight.departure }} to {{ flight.destination }} on {{ flight.time | date:'short' }} (Price: ${{ flight.price }})
-    </li>
-  </ul>
 </div>

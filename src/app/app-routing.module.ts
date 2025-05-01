@@ -4,35 +4,21 @@ import { UserLoginComponent } from './components/login/user-login/user-login.com
 import { AdminLoginComponent } from './components/login/admin-login/admin-login.component';
 import { UserDashboardComponent } from './components/user/user-dashboard/user-dashboard.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
-import { RegistrationComponent } from './components/user/registration/registration.component';
-import { AuthGuard } from './guards/auth.guard';
-import { BookTicketComponent } from './components/user/book-ticket/book-ticket.component';
-import { ManageFlightsComponent } from './components/admin/manage-flights/manage-flights.component';
-import { ManageTicketsComponent } from './components/admin/manage-tickets/manage-tickets.component';
+import { ManageBookingsComponent } from './components/admin/manage-bookings/manage-bookings.component';
 import { ManageUsersComponent } from './components/admin/manage-users/manage-users.component';
-import { HomeComponent } from './components/home/home.component';
-import { AboutComponent } from './components/about/about.component';
+import { ManageFlightsComponent } from './components/admin/manage-flights/manage-flights.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'about', component: AboutComponent },
   { path: 'login', component: UserLoginComponent },
   { path: 'admin/login', component: AdminLoginComponent },
-  { path: 'register', component: RegistrationComponent },
-  { path: 'user/dashboard', component: UserDashboardComponent, canActivate: [AuthGuard] },
-  { 
-    path: 'admin', 
-    component: AdminDashboardComponent, 
-    canActivate: [AuthGuard],
-    children: [
-      { path: '', redirectTo: 'manage-flights', pathMatch: 'full' },
-      { path: 'manage-flights', component: ManageFlightsComponent },
-      { path: 'manage-tickets', component: ManageTicketsComponent },
-      { path: 'manage-users', component: ManageUsersComponent }
-    ]
-  },
-  { path: 'book-ticket/:flightId', component: BookTicketComponent, canActivate: [AuthGuard] }
+  { path: 'user', component: UserDashboardComponent, canActivate: [AuthGuard], data: { role: 'user' } },
+  { path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
+  { path: 'admin/manage-bookings', component: ManageBookingsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
+  { path: 'admin/manage-users', component: ManageUsersComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
+  { path: 'admin/manage-flights', component: ManageFlightsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];
 
 @NgModule({

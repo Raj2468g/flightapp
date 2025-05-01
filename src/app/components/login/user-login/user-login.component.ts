@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +20,7 @@ export class UserLoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   login(): void {
-    this.error = ''; // Reset error
+    this.error = '';
     this.authService.userLogin(this.username, this.password).subscribe({
       next: () => {
         console.log('User login successful, navigating to /user');
