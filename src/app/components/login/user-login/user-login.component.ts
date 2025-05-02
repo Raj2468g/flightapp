@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-login',
@@ -16,8 +16,11 @@ export class UserLoginComponent {
   errors: string[] = [];
   isLoading: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
-
+  constructor(private route: ActivatedRoute, private authService: AuthService, private router: Router) {}
+  navigateToRegister() {
+    console.log(this.route.url);
+    this.router.navigate(['/user/registration']);
+  }
   login(): void {
     this.errors = [];
     this.isLoading = true;

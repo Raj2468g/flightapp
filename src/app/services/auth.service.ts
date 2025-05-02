@@ -23,9 +23,10 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   userLogin(username: string, password: string): Observable<LoginResponse> {
+    console.log('Sending userLogin request to:', `${this.apiUrl}/userLogin`, { username });
     return this.http.post<LoginResponse>(`${this.apiUrl}/userLogin`, { username, password }).pipe(
       tap(response => {
-        console.log('Storing login response:', response);
+        console.log('Received user login response:', response);
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
       })
@@ -33,9 +34,10 @@ export class AuthService {
   }
 
   adminLogin(username: string, password: string): Observable<LoginResponse> {
+    console.log('Sending adminLogin request to:', `${this.apiUrl}/adminLogin`, { username });
     return this.http.post<LoginResponse>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
       tap(response => {
-        console.log('Storing admin login response:', response);
+        console.log('Received admin login response:', response);
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
       })

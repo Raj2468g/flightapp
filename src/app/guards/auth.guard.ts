@@ -15,14 +15,14 @@ export class AuthGuard implements CanActivate {
 
     console.log('AuthGuard check:', { user, token, expectedRole });
     if (!token || !user) {
-      console.log('No token or user, redirecting to login');
+      console.log('No token or user, redirecting to:', expectedRole === 'admin' ? '/admin/login' : '/login');
       this.router.navigate([expectedRole === 'admin' ? '/admin/login' : '/login']);
       return false;
     }
 
     if (user.role !== expectedRole) {
       console.log(`Role mismatch: expected ${expectedRole}, got ${user.role}`);
-      this.router.navigate(['/login']);
+      this.router.navigate([user.role === 'admin' ? '/admin' : '/login']);
       return false;
     }
 

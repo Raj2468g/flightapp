@@ -8,6 +8,7 @@ import { ManageBookingsComponent } from './components/admin/manage-bookings/mana
 import { ManageUsersComponent } from './components/admin/manage-users/manage-users.component';
 import { ManageFlightsComponent } from './components/admin/manage-flights/manage-flights.component';
 import { AuthGuard } from './guards/auth.guard';
+import { RegistrationComponent } from './components/user/registration/registration.component';
 
 const routes: Routes = [
   { path: 'login', component: UserLoginComponent },
@@ -17,8 +18,9 @@ const routes: Routes = [
   { path: 'admin/manage-bookings', component: ManageBookingsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
   { path: 'admin/manage-users', component: ManageUsersComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
   { path: 'admin/manage-flights', component: ManageFlightsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
+  { path:'user/registration', component:RegistrationComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/login' },
 ];
 
 @NgModule({
