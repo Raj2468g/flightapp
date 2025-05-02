@@ -6,17 +6,7 @@ import { BookingService } from '../../../services/booking.service';
 import { Router } from '@angular/router';
 import { UserNavComponent } from '../user-nav/user-nav.component';
 
-interface Booking {
-  _id?: string;
-  flightId: string;
-  flightNumber: string;
-  userId: string;
-  username: string;
-  seats: number;
-  seatNumber: string[];
-  totalPrice: number;
-  bookingDate: string;
-}
+import { Booking } from '../../../models/booking';
 
 @Component({
   selector: 'app-user-dashboard',

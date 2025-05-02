@@ -40,7 +40,7 @@
             <td class="py-2 px-4">{{ booking.flightNumber }}</td>
             <td class="py-2 px-4">{{ booking.username }}</td>
             <td class="py-2 px-4">{{ booking.seats }}</td>
-            <td class="py-2 px-4">{{ booking.seatNumber.join(', ') }}</td>
+            <td class="py-2 px-4">{{ booking.seatNumber.join(', ') || 'N/A' }}</td>
             <td class="py-2 px-4">${{ booking.totalPrice | number:'1.2-2' }}</td>
             <td class="py-2 px-4">{{ booking.bookingDate }}</td>
           </tr>
