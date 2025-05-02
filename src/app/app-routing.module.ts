@@ -1,3 +1,4 @@
+// app-routing.module.ts
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { UserLoginComponent } from './components/login/user-login/user-login.component';
@@ -13,12 +14,12 @@ import { RegistrationComponent } from './components/user/registration/registrati
 const routes: Routes = [
   { path: 'login', component: UserLoginComponent },
   { path: 'admin/login', component: AdminLoginComponent },
+  { path: 'registration', component: RegistrationComponent },
   { path: 'user', component: UserDashboardComponent, canActivate: [AuthGuard], data: { role: 'user' } },
   { path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
   { path: 'admin/manage-bookings', component: ManageBookingsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
   { path: 'admin/manage-users', component: ManageUsersComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
   { path: 'admin/manage-flights', component: ManageFlightsComponent, canActivate: [AuthGuard], data: { role: 'admin' } },
-  { path:'user/registration', component:RegistrationComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' },
 ];

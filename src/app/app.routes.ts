@@ -8,12 +8,14 @@ import { AdminDashboardComponent } from './components/admin/admin-dashboard/admi
 import { ManageFlightsComponent } from './components/admin/manage-flights/manage-flights.component';
 import { ManageBookingsComponent } from './components/admin/manage-bookings/manage-bookings.component';
 import { ManageUsersComponent } from './components/admin/manage-users/manage-users.component';
+import { RegistrationComponent } from './components/user/registration/registration.component'; // Added import
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: UserLoginComponent },
   { path: 'admin/login', component: AdminLoginComponent },
+  { path: 'registration', component: RegistrationComponent }, // Added registration route
   { 
     path: 'user', 
     component: UserDashboardComponent, 

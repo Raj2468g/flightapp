@@ -35,8 +35,9 @@
     <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition duration-300" [disabled]="isLoading">
       <i class="fas fa-sign-in-alt mr-2"></i> Login
     </button>
-    <a (click) = 'navigateToRegister()' class="text-blue-500 hover:underline text-center block mt-4">
-      <i class="fas fa-user-plus mr-2"></i> Don't have an account? Register here.</a>
+    <a [routerLink]="['/registration']" class="text-blue-500 hover:underline text-center block mt-4">
+      <i class="fas fa-user-plus mr-2"></i> Don't have an account? Register here.
+    </a>
   </form>
 </div>
 </body>

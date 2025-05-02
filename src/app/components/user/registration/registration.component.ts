@@ -1,17 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule], // Added RouterModule
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']
 })
-export class RegistrationComponent implements OnInit {
+export class RegistrationComponent implements OnInit, AfterViewInit {
   registerForm: FormGroup;
 
   constructor(
@@ -19,6 +19,7 @@ export class RegistrationComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder
   ) {
+    console.log('RegistrationComponent constructor called');
     this.registerForm = this.fb.group({
       username: ['', [
         Validators.required,
@@ -40,7 +41,11 @@ export class RegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('RegistrationComponent initialized');
+    console.log('RegistrationComponent ngOnInit called');
+  }
+
+  ngAfterViewInit() {
+    console.log('RegistrationComponent ngAfterViewInit called');
   }
 
   passwordMatchValidator(form: FormGroup) {

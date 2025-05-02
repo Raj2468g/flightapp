@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router'; // Import RouterModule
 import { AppComponent } from './app.component';
 import { AdminLoginComponent } from './components/login/admin-login/admin-login.component';
 import { UserLoginComponent } from './components/login/user-login/user-login.component';
@@ -17,7 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { AdminNavComponent } from './components/admin/admin-nav/admin-nav.component';
 import { RegistrationComponent } from './components/user/registration/registration.component';
 import { UserNavComponent } from './components/user/user-nav/user-nav.component';
-import { routes } from './app.routes';
+import { routes } from './app.routes'; // Import routes from app.routes.ts
 
 @NgModule({
   declarations: [
@@ -28,7 +28,7 @@ import { routes } from './app.routes';
     CommonModule,
     FormsModule,
     HttpClientModule,
-    RouterModule.forRoot(routes),
+    RouterModule.forRoot(routes), // Use routes from app.routes.ts
     AdminLoginComponent,
     UserLoginComponent,
     AdminDashboardComponent,
