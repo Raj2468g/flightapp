@@ -20,9 +20,9 @@ export class BookTicketComponent implements OnInit {
   userId: string | null = null;
   selectedFlight: Flight | null = null;
   booking = {
-    seats: 1,
-    seatNumber: [''] as string[]
+    seats: 1
   };
+  generatedSeats: string[] = [];
   errors: string[] = [];
   isLoading: boolean = false;
 
@@ -66,8 +66,9 @@ export class BookTicketComponent implements OnInit {
   selectFlight(flight: Flight) {
     this.selectedFlight = flight;
     this.booking.seats = 1;
-    this.booking.seatNumber = [''];
+    this.generatedSeats = [];
     this.errors = [];
+    this.generateSeatNumbers();
   }
 
   updateSeatNumbers() {
@@ -79,7 +80,36 @@ export class BookTicketComponent implements OnInit {
     if (this.booking.seats < 1) {
       this.booking.seats = 1;
     }
-    this.booking.seatNumber = Array(this.booking.seats).fill('');
+    this.generateSeatNumbers();
+  }
+
+  generateSeatNumbers() {
+    if (!this.selectedFlight) return;
+    this.generatedSeats = [];
+    const bookedSeats = this.selectedFlight.bookedSeats || [];
+    const maxSeats = this.selectedFlight.maxTickets;
+    const requestedSeats = this.booking.seats;
+    let assigned = 0;
+    let row = 0;
+    let col = 1;
+
+    while (assigned < requestedSeats && row < 26) {
+      const seat = `${String.fromCharCode(65 + row)}${col}`;
+      if (!bookedSeats.includes(seat) && assigned < maxSeats) {
+        this.generatedSeats.push(seat);
+        assigned++;
+      }
+      col++;
+      if (col > 99) {
+        col = 1;
+        row++;
+      }
+    }
+
+    if (this.generatedSeats.length < requestedSeats) {
+      this.errors.push('Not enough unique seats available.');
+      this.generatedSeats = [];
+    }
   }
 
   bookFlight() {
@@ -93,13 +123,8 @@ export class BookTicketComponent implements OnInit {
       this.errors.push('At least 1 seat must be selected.');
       return;
     }
-    if (this.booking.seatNumber.some(sn => !sn)) {
-      this.errors.push('All seat numbers must be provided.');
-      return;
-    }
-    const uniqueSeats = new Set(this.booking.seatNumber);
-    if (uniqueSeats.size !== this.booking.seatNumber.length) {
-      this.errors.push('Seat numbers must be unique.');
+    if (this.generatedSeats.length !== this.booking.seats) {
+      this.errors.push('Failed to generate required seat numbers.');
       return;
     }
 
@@ -109,7 +134,7 @@ export class BookTicketComponent implements OnInit {
       userId: this.userId,
       username: this.authService.getCurrentUser()?.username || '',
       seats: this.booking.seats,
-      seatNumber: this.booking.seatNumber,
+      seatNumber: this.generatedSeats,
       totalPrice: this.booking.seats * this.selectedFlight.price,
       bookingDate: new Date().toISOString().split('T')[0]
     };
@@ -136,7 +161,7 @@ export class BookTicketComponent implements OnInit {
   cancelBooking() {
     this.selectedFlight = null;
     this.booking.seats = 1;
-    this.booking.seatNumber = [''];
+    this.generatedSeats = [];
     this.errors = [];
   }
 }
