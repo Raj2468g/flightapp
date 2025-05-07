@@ -18,6 +18,7 @@ import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 })
 export class ManageBookingsComponent implements OnInit {
   bookings: Booking[] = [];
+  filteredBookings: Booking[] = [];
   users: User[] = [];
   flights: Flight[] = [];
   newBooking: Booking = {
@@ -33,6 +34,8 @@ export class ManageBookingsComponent implements OnInit {
   editingBooking: Booking | null = null;
   errors: string[] = [];
   isLoading: boolean = false;
+  searchQuery: string = '';
+  selectedBookings: string[] = [];
 
   constructor(
     private bookingService: BookingService,
@@ -56,6 +59,7 @@ export class ManageBookingsComponent implements OnInit {
         this.users = users || [];
         this.flights = flights || [];
         this.bookings = bookings || [];
+        this.filteredBookings = [...this.bookings];
         console.log('Data loaded:', { users, flights, bookings });
         this.isLoading = false;
       })
@@ -125,6 +129,7 @@ export class ManageBookingsComponent implements OnInit {
     this.bookingService.addBooking(this.newBooking).subscribe({
       next: (booking) => {
         this.bookings.push(booking);
+        this.filteredBookings.push(booking);
         const flight = this.flights.find(f => f._id === booking.flightId);
         if (flight) {
           flight.availableTickets -= booking.seats;
@@ -172,6 +177,7 @@ export class ManageBookingsComponent implements OnInit {
         if (index !== -1) {
           const oldBooking = this.bookings[index];
           this.bookings[index] = updatedBooking;
+          this.filteredBookings[index] = updatedBooking;
           const seatDiff = updatedBooking.seats - oldBooking.seats;
           const flight = this.flights.find(f => f._id === updatedBooking.flightId);
           if (flight) {
@@ -213,6 +219,8 @@ export class ManageBookingsComponent implements OnInit {
           }
         }
         this.bookings = this.bookings.filter(b => b._id !== id);
+        this.filteredBookings = this.filteredBookings.filter(b => b._id !== id);
+        this.selectedBookings = this.selectedBookings.filter(b => b !== id);
         console.log('Booking deleted:', id);
         alert('Booking deleted successfully');
         this.isLoading = false;
@@ -225,5 +233,58 @@ export class ManageBookingsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  searchBookings(): void {
+    const query = this.searchQuery.toLowerCase();
+    this.filteredBookings = this.bookings.filter(booking =>
+      booking.flightNumber.toLowerCase().includes(query) ||
+      booking.username.toLowerCase().includes(query) ||
+      booking.seatNumber.join(', ').toLowerCase().includes(query)
+    );
+  }
+
+  toggleSelectBooking(id: string): void {
+    if (this.selectedBookings.includes(id)) {
+      this.selectedBookings = this.selectedBookings.filter(b => b !== id);
+    } else {
+      this.selectedBookings.push(id);
+    }
+  }
+
+  bulkDelete(): void {
+    if (this.selectedBookings.length === 0) {
+      this.errors = ['No bookings selected for deletion'];
+      return;
+    }
+    if (!confirm(`Are you sure you want to delete ${this.selectedBookings.length} bookings?`)) return;
+
+    this.isLoading = true;
+    const deletePromises = this.selectedBookings.map(id =>
+      this.bookingService.deleteBooking(id).toPromise()
+    );
+
+    Promise.all(deletePromises)
+      .then(() => {
+        this.selectedBookings.forEach(id => {
+          const booking = this.bookings.find(b => b._id === id);
+          if (booking) {
+            const flight = this.flights.find(f => f._id === booking.flightId);
+            if (flight) {
+              flight.availableTickets += booking.seats;
+            }
+          }
+        });
+        this.bookings = this.bookings.filter(b => !this.selectedBookings.includes(b._id!));
+        this.filteredBookings = this.filteredBookings.filter(b => !this.selectedBookings.includes(b._id!));
+        this.selectedBookings = [];
+        alert('Selected bookings deleted successfully');
+        this.isLoading = false;
+      })
+      .catch(err => {
+        console.error('Error during bulk deletion:', err);
+        this.errors = [err.message || 'Failed to delete selected bookings'];
+        this.isLoading = false;
+      });
   }
 }

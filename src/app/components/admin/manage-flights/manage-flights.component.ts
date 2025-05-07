@@ -15,6 +15,7 @@ import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 export class ManageFlightsComponent implements OnInit {
   flights: Flight[] = [];
   newFlight: Flight = {
+    _id: '',
     flightNumber: '',
     departure: '',
     destination: '',
@@ -22,7 +23,10 @@ export class ManageFlightsComponent implements OnInit {
     time: '',
     maxTickets: 0,
     price: 0,
-    availableTickets: 0
+    availableTickets: 0,
+    seats: [],
+    bookedSeats: [],
+    version: 1
   };
   editingFlight: Flight | null = null;
   errors: string[] = [];
@@ -55,8 +59,8 @@ export class ManageFlightsComponent implements OnInit {
 
   validateFlight(flight: Flight): string[] {
     const errors: string[] = [];
-    if (!flight.flightNumber || !/^[A-Z0-9]{3,10}$/.test(flight.flightNumber)) {
-      errors.push('Flight number must be 3-10 alphanumeric characters');
+    if (!flight.flightNumber || !/^[A-Z0-9]{2,6}$/.test(flight.flightNumber)) {
+      errors.push('Flight number must be 2-6 alphanumeric characters');
     }
     if (!flight.departure || flight.departure.length < 2) {
       errors.push('Departure city must be at least 2 characters');
@@ -76,13 +80,6 @@ export class ManageFlightsComponent implements OnInit {
     if (flight.price <= 0) {
       errors.push('Price must be greater than 0');
     }
-    if (this.editingFlight) {
-      if (flight.availableTickets < 0 || flight.availableTickets > flight.maxTickets) {
-        errors.push(`Available tickets must be between 0 and ${flight.maxTickets}`);
-      }
-    } else {
-      flight.availableTickets = flight.maxTickets;
-    }
     return errors;
   }
 
@@ -96,6 +93,7 @@ export class ManageFlightsComponent implements OnInit {
       next: (flight) => {
         this.flights.push(flight);
         this.newFlight = {
+          _id: '',
           flightNumber: '',
           departure: '',
           destination: '',
@@ -103,7 +101,10 @@ export class ManageFlightsComponent implements OnInit {
           time: '',
           maxTickets: 0,
           price: 0,
-          availableTickets: 0
+          availableTickets: 0,
+          seats: [],
+          bookedSeats: [],
+          version: 1
         };
         console.log('Flight added:', flight);
         alert('Flight added successfully');

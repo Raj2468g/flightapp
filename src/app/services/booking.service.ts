@@ -13,7 +13,12 @@ export class BookingService {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    if (!token) {
+      console.error('No token found in localStorage');
+    } else {
+      console.log('Sending token:', token);
+    }
+    return new HttpHeaders().set('Authorization', `Bearer ${token || ''}`);
   }
 
   getBookings(): Observable<Booking[]> {
@@ -33,6 +38,7 @@ export class BookingService {
   }
 
   deleteBooking(id: string): Observable<void> {
+    console.log('Attempting to delete booking with ID:', id);
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 }

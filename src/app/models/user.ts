@@ -1,10 +1,10 @@
 export interface User {
   _id?: string;
   username: string;
-  email: string;
-  password?: string;
+  password: string;
   phone?: string;
+  email: string;
   gender?: string;
-  role: 'admin' | 'user';
-  createdAt?: string;
+  role: string;
+  createdAt: string;
 }

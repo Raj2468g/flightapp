@@ -14,7 +14,6 @@ import { AuthGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: UserLoginComponent },
-  { path: 'admin/login', component: AdminLoginComponent },
   { path: 'registration', component: RegistrationComponent }, // Added registration route
   { 
     path: 'user', 

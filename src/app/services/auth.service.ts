@@ -49,7 +49,9 @@ export class AuthService {
     console.log('Retrieved user for getUserId:', user);
     return user ? user._id : null;
   }
-
+  checkUsername(username: string): Observable<{ exists: boolean }> {
+    return this.http.post<{ exists: boolean }>(`${this.apiUrl}/check-username`, { username });
+  }
   getCurrentUser(): User | null {
     const user = localStorage.getItem('user');
     console.log('Retrieved user from localStorage:', user);

@@ -1,4 +1,217 @@
-/* Minimal styles as Tailwind handles most styling */
+/* Attractive CSS for Admin Dashboard Component with Flight-Themed Background and Icons */
+body {
+  /* Vibrant flight-themed background (airplane in sunset sky) */
+  background-image: url('https://images.unsplash.com/photo-1513278974582-3aa73f0e3941?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Lato', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Gradient overlay for enhanced vibrancy */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+  z-index: 1;
+}
+
 .container {
   min-height: calc(100vh - 80px); /* Adjust for navbar height */
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-container {
+  max-width: 1050px;
+  margin: 2.5rem auto;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: box-shadow 0.3s ease;
+  animation: floatIn 0.8s ease-out;
+}
+
+.dashboard-container:hover {
+  box-shadow: 0 15px 60px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  font-size: 2.6rem;
+  color: #1e3a8a;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+  letter-spacing: 0.6px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Cloud icon before title */
+h1::before {
+  content: '\f0c2'; /* Font Awesome cloud icon */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #3b82f6;
+  font-size: 2.2rem;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Animated underline */
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100px;
+  height: 5px;
+  background: linear-gradient(90deg, #2563eb, #93c5fd);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+h1:hover::after {
+  width: 140px;
+}
+
+p {
+  font-size: 1.15rem;
+  color: #111827;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(241, 245, 249, 0.9));
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  transition: background 0.3s ease;
+}
+
+/* Welcome icon */
+p::before {
+  content: '\f4fe'; /* Font Awesome dashboard icon */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #2563eb;
+  font-size: 1.3rem;
+}
+
+p:hover {
+  background: linear-gradient(90deg, rgba(241, 245, 249, 0.9), rgba(255, 255, 255, 0.9));
+}
+
+/* Font Awesome icon styling */
+.fas {
+  color: #2563eb;
+  font-size: 1.4rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.fas:hover {
+  color: #1e40af;
+  transform: rotate(10deg);
+}
+
+/* Router outlet container with decorative background icon */
+router-outlet + * {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 14px;
+  padding: 2.25rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+router-outlet + *::before {
+  content: '\f5b0'; /* Font Awesome jet-fighter icon */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  font-size: 5rem;
+  color: rgba(59, 130, 246, 0.1);
+  transform: rotate(-45deg);
+  z-index: 0;
+}
+
+router-outlet + *:hover {
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    margin: 1.5rem;
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  h1::before {
+    font-size: 1.8rem;
+  }
+
+  h1::after {
+    width: 80px;
+  }
+
+  p {
+    font-size: 1.05rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h1::before {
+    font-size: 1.5rem;
+  }
+
+  h1::after {
+    width: 60px;
+  }
+
+  p {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  router-outlet + *::before {
+    font-size: 4rem;
+    bottom: -15px;
+    right: -15px;
+  }
 }

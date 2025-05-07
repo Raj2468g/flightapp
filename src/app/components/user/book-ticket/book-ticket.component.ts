@@ -5,7 +5,7 @@ import { FlightService } from '../../../services/flight.service';
 import { BookingService } from '../../../services/booking.service';
 import { AuthService } from '../../../services/auth.service';
 import { Flight } from '../../../models/flight';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UserNavComponent } from '../user-nav/user-nav.component';
 
 @Component({
@@ -19,18 +19,22 @@ export class BookTicketComponent implements OnInit {
   flights: Flight[] = [];
   userId: string | null = null;
   selectedFlight: Flight | null = null;
-  booking = {
-    seats: 1
-  };
+  booking = { seats: 1 };
   generatedSeats: string[] = [];
   errors: string[] = [];
   isLoading: boolean = false;
+  seatsInvalid: boolean = false;
+  seatsError: string = '';
+  showConfirmation: boolean = false;
+  bookingSuccess: boolean = false;
+  lastBooking: any = null;
 
   constructor(
-    private flightService: FlightService,
-    private bookingService: BookingService,
-    private authService: AuthService,
-    private router: Router
+    public flightService: FlightService,
+    public bookingService: BookingService,
+    public authService: AuthService,
+    public router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -40,7 +44,14 @@ export class BookTicketComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    this.loadFlights();
+    this.route.queryParams.subscribe(params => {
+      const flightId = params['flightId'];
+      if (flightId) {
+        this.loadFlightById(flightId);
+      } else {
+        this.loadFlights();
+      }
+    });
   }
 
   loadFlights() {
@@ -63,53 +74,98 @@ export class BookTicketComponent implements OnInit {
     });
   }
 
+  loadFlightById(flightId: string) {
+    this.isLoading = true;
+    this.errors = [];
+    this.flightService.getFlights().subscribe({
+      next: (flights) => {
+        const flight = flights.find(f => f._id === flightId && f.availableTickets > 0);
+        if (flight) {
+          this.selectedFlight = flight;
+          this.flights = [flight];
+          this.generateRandomSeats();
+        } else {
+          this.errors.push('Selected flight is not available.');
+          this.loadFlights();
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading flight:', err);
+        this.errors.push(err.message || 'Failed to load flight. Please try again later.');
+        this.isLoading = false;
+      }
+    });
+  }
+
   selectFlight(flight: Flight) {
     this.selectedFlight = flight;
     this.booking.seats = 1;
     this.generatedSeats = [];
     this.errors = [];
-    this.generateSeatNumbers();
+    this.seatsInvalid = false;
+    this.generateRandomSeats();
   }
 
-  updateSeatNumbers() {
+  validateSeats() {
+    this.seatsInvalid = false;
+    this.seatsError = '';
+
     if (!this.selectedFlight) return;
-    if (this.booking.seats > this.selectedFlight.availableTickets) {
-      this.errors = [`Only ${this.selectedFlight.availableTickets} tickets available`];
+
+    if (this.booking.seats < 1) {
+      this.seatsInvalid = true;
+      this.seatsError = 'Please select at least 1 seat.';
+    } else if (this.booking.seats > this.selectedFlight.availableTickets) {
+      this.seatsInvalid = true;
+      this.seatsError = `Only ${this.selectedFlight.availableTickets} seats available.`;
       this.booking.seats = this.selectedFlight.availableTickets;
     }
-    if (this.booking.seats < 1) {
-      this.booking.seats = 1;
-    }
-    this.generateSeatNumbers();
+
+    this.generateRandomSeats();
   }
 
-  generateSeatNumbers() {
+  generateRandomSeats() {
     if (!this.selectedFlight) return;
     this.generatedSeats = [];
     const bookedSeats = this.selectedFlight.bookedSeats || [];
     const maxSeats = this.selectedFlight.maxTickets;
     const requestedSeats = this.booking.seats;
-    let assigned = 0;
-    let row = 0;
-    let col = 1;
 
-    while (assigned < requestedSeats && row < 26) {
-      const seat = `${String.fromCharCode(65 + row)}${col}`;
-      if (!bookedSeats.includes(seat) && assigned < maxSeats) {
-        this.generatedSeats.push(seat);
-        assigned++;
+    // Generate a pool of possible seats
+    const possibleSeats: string[] = [];
+    for (let row = 0; row < 26 && possibleSeats.length < maxSeats; row++) {
+      for (let col = 1; col <= 10 && possibleSeats.length < maxSeats; col++) {
+        const seat = `${String.fromCharCode(65 + row)}${col}`;
+        if (!bookedSeats.includes(seat)) {
+          possibleSeats.push(seat);
+        }
       }
-      col++;
-      if (col > 99) {
-        col = 1;
-        row++;
-      }
+    }
+
+    // Randomly select seats
+    for (let i = 0; i < requestedSeats && possibleSeats.length > 0; i++) {
+      const randomIndex = Math.floor(Math.random() * possibleSeats.length);
+      this.generatedSeats.push(possibleSeats.splice(randomIndex, 1)[0]);
     }
 
     if (this.generatedSeats.length < requestedSeats) {
-      this.errors.push('Not enough unique seats available.');
+      this.seatsInvalid = true;
+      this.seatsError = 'Not enough unique seats available.';
       this.generatedSeats = [];
     }
+  }
+
+  proceedToConfirmation() {
+    if (!this.selectedFlight || this.seatsInvalid) {
+      this.errors.push('Please correct the errors before proceeding.');
+      return;
+    }
+    if (this.generatedSeats.length !== this.booking.seats) {
+      this.errors.push('Failed to assign the required number of seats.');
+      return;
+    }
+    this.showConfirmation = true;
   }
 
   bookFlight() {
@@ -118,13 +174,8 @@ export class BookTicketComponent implements OnInit {
       return;
     }
 
-    this.errors = [];
-    if (this.booking.seats < 1) {
-      this.errors.push('At least 1 seat must be selected.');
-      return;
-    }
     if (this.generatedSeats.length !== this.booking.seats) {
-      this.errors.push('Failed to generate required seat numbers.');
+      this.errors.push('Assigned seats do not match the number of seats requested.');
       return;
     }
 
@@ -144,8 +195,13 @@ export class BookTicketComponent implements OnInit {
     this.bookingService.addBooking(bookingData).subscribe({
       next: (booking) => {
         console.log('Booking successful:', booking);
-        alert('Booking successful!');
-        this.router.navigate(['/user']);
+        this.lastBooking = {
+          ...booking,
+          departure: this.selectedFlight?.departure,
+          destination: this.selectedFlight?.destination
+        };
+        this.bookingSuccess = true;
+        this.showConfirmation = false;
         this.isLoading = false;
       },
       error: (err) => {
@@ -153,6 +209,7 @@ export class BookTicketComponent implements OnInit {
         this.errors = Array.isArray(err.details)
           ? err.details
           : [err.message || 'Failed to book flight. Please try again.'];
+        this.showConfirmation = false;
         this.isLoading = false;
       }
     });
@@ -163,5 +220,7 @@ export class BookTicketComponent implements OnInit {
     this.booking.seats = 1;
     this.generatedSeats = [];
     this.errors = [];
+    this.seatsInvalid = false;
+    this.showConfirmation = false;
   }
 }

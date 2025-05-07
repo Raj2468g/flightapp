@@ -6,7 +6,9 @@ export interface Flight {
   date: string;
   time: string;
   maxTickets: number;
-  availableTickets: number;
   price: number;
-  bookedSeats?: string[];
+  availableTickets: number;
+  seats: string[];
+  bookedSeats: string[];
+  version: number;
 }

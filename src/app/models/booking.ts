@@ -8,4 +8,9 @@ export interface Booking {
   seatNumber: string[];
   totalPrice: number;
   bookingDate: string;
+  status?: 'Confirmed' | 'Cancelled';
+  departure?: string;
+  destination?: string;
+  flightDate?: string;
+  flightTime?: string;
 }
