@@ -15,7 +15,6 @@ import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 export class ManageFlightsComponent implements OnInit {
   flights: Flight[] = [];
   newFlight: Flight = {
-    _id: '',
     flightNumber: '',
     departure: '',
     destination: '',
@@ -89,11 +88,12 @@ export class ManageFlightsComponent implements OnInit {
 
     this.isLoading = true;
     console.log('Adding flight:', this.newFlight);
-    this.flightService.addFlight(this.newFlight).subscribe({
+    const flightToAdd = { ...this.newFlight }; // Ensure no _id is included
+    delete flightToAdd._id; // Explicitly remove _id if present
+    this.flightService.addFlight(flightToAdd).subscribe({
       next: (flight) => {
         this.flights.push(flight);
         this.newFlight = {
-          _id: '',
           flightNumber: '',
           departure: '',
           destination: '',

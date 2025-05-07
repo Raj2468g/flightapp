@@ -21,7 +21,8 @@ export class FlightService {
   }
 
   addFlight(flight: Flight): Observable<Flight> {
-    return this.http.post<Flight>(this.apiUrl, flight, { headers: this.getHeaders() });
+    const { _id, ...flightWithoutId } = flight; // Exclude _id
+    return this.http.post<Flight>(this.apiUrl, flightWithoutId, { headers: this.getHeaders() });
   }
 
   updateFlight(flight: Flight): Observable<Flight> {
