@@ -38,8 +38,8 @@ export class ManageUsersComponent implements OnInit {
     this.errors = [];
     this.userService.getUsers().subscribe({
       next: (users) => {
-        this.users = users;
-        console.log('Users loaded:', users);
+        this.users = users.filter(user => user.role.toLowerCase() === 'user');
+        console.log('Users loaded:', this.users);
         this.isLoading = false;
       },
       error: (err) => {
@@ -83,7 +83,9 @@ export class ManageUsersComponent implements OnInit {
     console.log('Adding user:', this.newUser);
     this.userService.addUser(this.newUser).subscribe({
       next: (user) => {
-        this.users.push(user);
+        if (user.role.toLowerCase() === 'user') {
+          this.users.push(user);
+        }
         this.newUser = {
           username: '',
           email: '',
@@ -123,8 +125,10 @@ export class ManageUsersComponent implements OnInit {
     this.userService.updateUser(this.editingUser).subscribe({
       next: (updatedUser) => {
         const index = this.users.findIndex(u => u._id === updatedUser._id);
-        if (index !== -1) {
+        if (index !== -1 && updatedUser.role.toLowerCase() === 'user') {
           this.users[index] = updatedUser;
+        } else if (index !== -1 && updatedUser.role.toLowerCase() !== 'user') {
+          this.users.splice(index, 1); // Remove if role changed to admin
         }
         this.editingUser = null;
         console.log('User updated:', updatedUser);

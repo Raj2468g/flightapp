@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BookingService } from '../../../services/booking.service';
@@ -9,10 +9,25 @@ import { User } from '../../../models/user';
 import { Flight } from '../../../models/flight';
 import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 
+@Pipe({
+  name: 'highlight',
+  standalone: true
+})
+export class HighlightPipe implements PipeTransform {
+  transform(text: string, search: string, searchField: string): string {
+    if (!search || !text || (searchField !== 'both' && searchField !== 'flightNumber' && searchField !== 'username')) {
+      return text;
+    }
+    const pattern = search.toLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(pattern, 'gi');
+    return text.replace(regex, match => `<span class="highlight">${match}</span>`);
+  }
+}
+
 @Component({
   selector: 'app-manage-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminNavComponent],
+  imports: [CommonModule, FormsModule, AdminNavComponent, HighlightPipe],
   templateUrl: './manage-bookings.component.html',
   styleUrls: ['./manage-bookings.component.css']
 })
@@ -35,6 +50,7 @@ export class ManageBookingsComponent implements OnInit {
   errors: string[] = [];
   isLoading: boolean = false;
   searchQuery: string = '';
+  searchField: 'flightNumber' | 'username' | 'both' = 'both';
   selectedBookings: string[] = [];
 
   constructor(
@@ -236,12 +252,30 @@ export class ManageBookingsComponent implements OnInit {
   }
 
   searchBookings(): void {
-    const query = this.searchQuery.toLowerCase();
-    this.filteredBookings = this.bookings.filter(booking =>
-      booking.flightNumber.toLowerCase().includes(query) ||
-      booking.username.toLowerCase().includes(query) ||
-      booking.seatNumber.join(', ').toLowerCase().includes(query)
-    );
+    const query = this.searchQuery.trim().toLowerCase();
+    if (!query) {
+      this.filteredBookings = [...this.bookings];
+      return;
+    }
+
+    this.filteredBookings = this.bookings.filter(booking => {
+      const flightNumber = booking.flightNumber.toLowerCase();
+      const username = booking.username.toLowerCase();
+
+      if (this.searchField === 'both') {
+        return flightNumber.includes(query) || username.includes(query);
+      } else if (this.searchField === 'flightNumber') {
+        return flightNumber.includes(query);
+      } else {
+        return username.includes(query);
+      }
+    });
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchField = 'both';
+    this.filteredBookings = [...this.bookings];
   }
 
   toggleSelectBooking(id: string): void {

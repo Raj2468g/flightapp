@@ -14,24 +14,29 @@ import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 })
 export class ManageFlightsComponent implements OnInit {
   flights: Flight[] = [];
-  newFlight: Flight = {
-    flightNumber: '',
-    departure: '',
-    destination: '',
-    date: '',
-    time: '',
-    maxTickets: 0,
-    price: 0,
-    availableTickets: 0,
-    seats: [],
-    bookedSeats: [],
-    version: 1
-  };
+  newFlight: Flight;
   editingFlight: Flight | null = null;
   errors: string[] = [];
   isLoading: boolean = false;
+  minDate: string;
 
-  constructor(private flightService: FlightService) {}
+  constructor(private flightService: FlightService) {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+    this.newFlight = {
+      flightNumber: '',
+      departure: '',
+      destination: '',
+      date: this.minDate,
+      time: '',
+      maxTickets: 0,
+      price: 0,
+      availableTickets: 0,
+      seats: [],
+      bookedSeats: [],
+      version: 1
+    };
+  }
 
   ngOnInit(): void {
     this.loadFlights();
@@ -64,7 +69,7 @@ export class ManageFlightsComponent implements OnInit {
     if (!flight.departure || flight.departure.length < 2) {
       errors.push('Departure city must be at least 2 characters');
     }
-    if (!flight.destination || flight.destination.length < 2) {
+    if (!flight.destination || flight.departure.length < 2) {
       errors.push('Destination city must be at least 2 characters');
     }
     if (!flight.date || !/^\d{4}-\d{2}-\d{2}$/.test(flight.date)) {
@@ -97,7 +102,7 @@ export class ManageFlightsComponent implements OnInit {
           flightNumber: '',
           departure: '',
           destination: '',
-          date: '',
+          date: this.minDate,
           time: '',
           maxTickets: 0,
           price: 0,
