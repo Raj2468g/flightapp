@@ -1,36 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { AdminNavComponent } from '../admin-nav/admin-nav.component';
 import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
-import { User } from '../../../models/user';
 
 @Component({
   selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, AdminNavComponent],
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css'],
-  standalone: false
+  styleUrls: ['./admin-dashboard.component.css']
 })
-export class AdminDashboardComponent implements OnInit {
-  currentAdminName: string = 'Admin';
+export class AdminDashboardComponent {
+  username: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  ngOnInit() {
-    this.loadAdmin();
-  }
-
-  private loadAdmin() {
-    try {
-      const user = this.authService.getCurrentUser();
-      this.currentAdminName = user?.role || 'Admin'; // Fallback to 'Admin'
-      console.log('Current admin:', user);
-    } catch (err) {
-      console.error('Error loading admin:', err);
-      this.currentAdminName = 'Admin';
-    }
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/admin-login']);
+  constructor(private authService: AuthService) {
+    const user = this.authService.getCurrentUser();
+    this.username = user ? user.username : null;
   }
 }

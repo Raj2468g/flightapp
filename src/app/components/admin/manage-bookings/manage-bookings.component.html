@@ -1,18 +1,175 @@
-<div class="container">
-  <h2>Manage Bookings</h2>
-  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-  <table>
-    <tr>
-      <th>User ID</th>
-      <th>Flight Number</th>
-      <th>Booking Date</th>
-      <th>Actions</th>
-    </tr>
-    <tr *ngFor="let booking of bookings">
-      <td>{{ booking.userId }}</td>
-      <td>{{ booking.flightId }}</td>
-      <td>{{ booking.bookingDate | date:'short' }}</td>
-      <td><button (click)="deleteBooking(booking._id)" class="delete-btn">Delete</button></td>
-    </tr>
-  </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<app-admin-nav></app-admin-nav>
+<div class="manage-bookings-container container mx-auto mt-8 p-4">
+  <h2 class="text-2xl font-bold text-blue-800 mb-4"><i class="fas fa-ticket-alt"></i> Manage Bookings</h2>
+
+  <!-- Error Messages -->
+  <div class="error-messages bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" *ngIf="errors.length > 0">
+    <p *ngFor="let error of errors" class="error"><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading text-center text-blue-600" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading...
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-bar mb-4 bg-white bg-opacity-20 p-4 rounded-lg shadow-md">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      <div class="form-group">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search bookings..." class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800" />
+      </div>
+      <div class="form-group">
+        <select [(ngModel)]="searchField" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          <option value="both">Flight Number & Username</option>
+          <option value="flightNumber">Flight Number</option>
+          <option value="username">Username</option>
+        </select>
+      </div>
+      <div class="form-group flex space-x-2">
+        <button class="btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" (click)="searchBookings()"><i class="fas fa-search"></i> Search</button>
+        <button class="btn bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" (click)="clearSearch()"><i class="fas fa-times"></i> Clear</button>
+      </div>
+    </div>
+    <div class="mt-2 text-blue-700" *ngIf="filteredBookings.length >= 0">
+      <i class="fas fa-info-circle"></i> Found {{ filteredBookings.length }} booking(s)
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions mb-4" *ngIf="selectedBookings.length > 0">
+    <button class="btn bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" (click)="bulkDelete()" title="Delete Selected"><i class="fas fa-trash"></i> Delete Selected ({{ selectedBookings.length }})</button>
+  </div>
+
+  <!-- Add Booking Form -->
+  <div class="add-booking-form bg-white bg-opacity-20 p-6 rounded-lg shadow-md mb-8">
+    <h3 class="text-xl font-semibold text-blue-700 mb-4"><i class="fas fa-plus-circle"></i> Add New Booking</h3>
+    <form (ngSubmit)="addBooking()" class="booking-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="form-group">
+        <label for="flightId" class="block text-blue-700 font-medium"><i class="fas fa-plane"></i> Flight</label>
+        <select id="flightId" [(ngModel)]="newBooking.flightId" name="flightId" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          <option value="">Select Flight</option>
+          <option *ngFor="let flight of flights" [value]="flight._id">{{ flight.flightNumber }} ({{ flight.departure }} to {{ flight.destination }})</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="userId" class="block text-blue-700 font-medium"><i class="fas fa-user"></i> User</label>
+        <select id="userId" [(ngModel)]="newBooking.userId" name="userId" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          <option value="">Select User</option>
+          <option *ngFor="let user of users" [value]="user._id">{{ user.username }} ({{ user.email }})</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="seats" class="block text-blue-700 font-medium"><i class="fas fa-chair"></i> Seats</label>
+        <input type="number" id="seats" [(ngModel)]="newBooking.seats" name="seats" required min="1" (change)="updateSeatNumbers()" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <div class="form-group seat-numbers col-span-full">
+        <label class="block text-blue-700 font-medium"><i class="fas fa-ticket-alt"></i> Seat Numbers</label>
+        <div *ngFor="let seat of newBooking.seatNumber; let i = index" class="seat-input mt-2">
+          <input type="text" [(ngModel)]="newBooking.seatNumber[i]" [name]="'seatNumber' + i" required placeholder="e.g., A1" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="bookingDate" class="block text-blue-700 font-medium"><i class="fas fa-calendar-alt"></i> Booking Date</label>
+        <input type="date" id="bookingDate" [(ngModel)]="newBooking.bookingDate" name="bookingDate" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <button type="submit" class="btn bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition duration-300 col-span-full" [disabled]="isLoading"><i class="fas fa-plus"></i> Add Booking</button>
+    </form>
+  </div>
+
+  <!-- Booking List -->
+  <div class="booking-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngIf="filteredBookings.length === 0 && !isLoading" class="no-bookings text-center text-blue-600 text-lg">
+      <i class="fas fa-exclamation-circle"></i> No bookings found.
+    </div>
+    <div *ngFor="let booking of filteredBookings; let i = index" class="booking-card bg-white bg-opacity-20 p-4 rounded-lg shadow-md">
+      <div class="card-header flex justify-between items-center mb-4">
+        <div class="flex items-center gap-4">
+          <div class="checkbox-container">
+            <input type="checkbox" [checked]="selectedBookings.includes(booking._id!)" (change)="toggleSelectBooking(booking._id!)" />
+          </div>
+          <span class="booking-id font-bold text-blue-800"><i class="fas fa-ticket-alt"></i> Booking ID: {{ i + 1 }}</span>
+        </div>
+        <div class="action-buttons flex space-x-2">
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <button class="btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600" (click)="saveBooking()" title="Save Changes" [disabled]="isLoading"><i class="fas fa-save"></i></button>
+            <button class="btn bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600" (click)="cancelEdit()" title="Cancel" [disabled]="isLoading"><i class="fas fa-times"></i></button>
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            <button class="btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" (click)="editBooking(booking)" title="Edit Booking" [disabled]="isLoading"><i class="fas fa-edit"></i></button>
+            <button class="btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" (click)="deleteBooking(booking._id ?? '')" title="Delete Booking" [disabled]="isLoading"><i class="fas fa-trash"></i></button>
+          </ng-container>
+        </div>
+      </div>
+      <div class="card-body grid gap-2">
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-plane"></i> Flight:</span>
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <select [(ngModel)]="editingBooking!.flightId" name="editFlightId" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+              <option value="">Select Flight</option>
+              <option *ngFor="let flight of flights" [value]="flight._id">{{ flight.flightNumber }} ({{ flight.departure }} to {{ flight.destination }})</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            <span [innerHTML]="booking.flightNumber | highlight:searchQuery:searchField"></span>
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-user"></i> User:</span>
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <select [(ngModel)]="editingBooking!.userId" name="editUserId" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+              <option value="">Select User</option>
+              <option *ngFor="let user of users" [value]="user._id">{{ user.username }} ({{ user.email }})</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            <span [innerHTML]="booking.username | highlight:searchQuery:searchField"></span>
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-chair"></i> Seats:</span>
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <input type="number" [(ngModel)]="editingBooking!.seats" name="editSeats" required min="1" (change)="updateSeatNumbers()" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            {{ booking.seats }}
+          </ng-container>
+        </div>
+        <div class="card-field seat-numbers flex flex-col">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-ticket-alt"></i> Seat Numbers:</span>
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <div *ngFor="let seat of editingBooking!.seatNumber; let i = index" class="seat-input mt-2">
+              <input type="text" [(ngModel)]="editingBooking!.seatNumber[i]" [name]="'editSeatNumber' + i" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            {{ booking.seatNumber.join(', ') }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-dollar-sign"></i> Total Price:</span>
+          {{ booking.totalPrice | currency }}
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[120px]"><i class="fas fa-calendar-alt"></i> Booking Date:</span>
+          <ng-container *ngIf="editingBooking && editingBooking._id === booking._id">
+            <input type="date" [(ngModel)]="editingBooking!.bookingDate" name="editBookingDate" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingBooking || editingBooking._id !== booking._id">
+            {{ booking.bookingDate }}
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+</body>
+</html>

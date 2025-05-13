@@ -1,18 +1,21 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-nav',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './user-nav.component.html',
-  styleUrls: ['./user-nav.component.css'],
-  standalone : false
+  styleUrls: ['./user-nav.component.css']
 })
 export class UserNavComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
-  logout() {
+  logout(): void {
     this.authService.logout();
-    this.router.navigate(['/user-login']);
+    this.router.navigate(['/login']);
   }
 }

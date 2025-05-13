@@ -1,61 +1,66 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+interface User {
+  _id: string;
+  username: string;
+  role: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: User;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:5000/api';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient) {}
 
-  login(username: string, password: string, role: 'admin' | 'user'): Observable<boolean> {
-    return this.http.post<{ success: boolean, userId?: string, error?: string }>(
-      `${this.apiUrl}/auth/login`, 
-      { username, password, role }
-    ).pipe(
-      map(response => {
-        if (response.success && response.userId) {
-          localStorage.setItem('currentUser', JSON.stringify({ _id: response.userId, role }));
-          return true;
-        }
-        throw new Error(response.error || 'Invalid credentials');
-      }),
-      catchError(err => {
-        console.error('Login error:', err);
-        return throwError(() => new Error(err.message || 'Login failed'));
+  userLogin(username: string, password: string): Observable<LoginResponse> {
+    console.log('Sending userLogin request to:', `${this.apiUrl}/userLogin`, { username });
+    return this.http.post<LoginResponse>(`${this.apiUrl}/userLogin`, { username, password }).pipe(
+      tap(response => {
+        console.log('Received user login response:', response);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
       })
     );
   }
 
-  logout(): void {
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['/user-login']);
+  adminLogin(username: string, password: string): Observable<LoginResponse> {
+    console.log('Sending adminLogin request to:', `${this.apiUrl}/adminLogin`, { username });
+    return this.http.post<LoginResponse>(`${this.apiUrl}/adminLogin`, { username, password }).pipe(
+      tap(response => {
+        console.log('Received admin login response:', response);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+      })
+    );
   }
 
-  getUserId(): string {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (!user._id) {
-      throw new Error('User not logged in');
-    }
-    return user._id;
+  getUserId(): string | null {
+    const user = this.getCurrentUser();
+    console.log('Retrieved user for getUserId:', user);
+    return user ? user._id : null;
   }
-
-  hasRole(role: string): boolean {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    return user.role === role;
+  checkUsername(username: string): Observable<{ exists: boolean }> {
+    return this.http.post<{ exists: boolean }>(`${this.apiUrl}/check-username`, { username });
   }
-
-  isLoggedIn(): boolean {
-    const user = localStorage.getItem('currentUser');
-    return !!user;
-  }
-
-  getCurrentUser(): { _id: string; role: string } | null {
-    const user = localStorage.getItem('currentUser');
+  getCurrentUser(): User | null {
+    const user = localStorage.getItem('user');
+    console.log('Retrieved user from localStorage:', user);
     return user ? JSON.parse(user) : null;
+  }
+
+  logout(): void {
+    console.log('Clearing localStorage');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }

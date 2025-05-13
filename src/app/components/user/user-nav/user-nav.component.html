@@ -1,6 +1,29 @@
-<nav class="nav-container">
-    <a routerLink="/user/book" class="nav-link">Book Ticket</a>
-    <a routerLink="/user/tickets" class="nav-link">View Tickets</a>
-    <a routerLink="/user/profile" class="nav-link">Update Profile</a>
-    <button (click)="logout()" class="logout-btn">Logout</button>
-  </nav>
+<nav class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 shadow-lg">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="text-white text-2xl font-bold">
+      <i class="fas fa-plane mr-2"></i> User Portal
+    </div>
+    <ul class="flex space-x-6">
+      <li>
+        <a routerLink="/user" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a routerLink="/user/book-ticket" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-ticket-alt mr-2"></i> Book Ticket
+        </a>
+      </li>
+      <li>
+        <a routerLink="/user/flights" routerLinkActive="bg-blue-800" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-plane mr-2"></i> View Flights
+        </a>
+      </li>
+      <li>
+        <button (click)="logout()" class="text-white hover:bg-red-600 px-3 py-2 rounded-md transition duration-300 flex items-center">
+          <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>

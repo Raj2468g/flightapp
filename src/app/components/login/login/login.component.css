@@ -1,0 +1,4 @@
+/* Minimal styles to complement Tailwind */
+.login-container {
+    max-width: 400px;
+  }

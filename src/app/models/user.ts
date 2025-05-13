@@ -1,9 +1,10 @@
 export interface User {
-  _id: string;
-  id: string;
+  _id?: string;
   username: string;
   password: string;
-  name?: string; // Optional to avoid backend changes
+  phone?: string;
   email: string;
+  gender?: string;
   role: string;
+  createdAt: string;
 }

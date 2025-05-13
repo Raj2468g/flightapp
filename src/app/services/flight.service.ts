@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Flight } from '../models/flight';
 
@@ -7,23 +7,29 @@ import { Flight } from '../models/flight';
   providedIn: 'root'
 })
 export class FlightService {
-  private apiUrl = 'http://localhost:3000/api/flights';
+  private apiUrl = 'http://localhost:5000/api/flights';
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
+
   getFlights(): Observable<Flight[]> {
-    return this.http.get<Flight[]>(this.apiUrl);
+    return this.http.get<Flight[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
   addFlight(flight: Flight): Observable<Flight> {
-    return this.http.post<Flight>(this.apiUrl, flight);
+    const { _id, ...flightWithoutId } = flight; // Exclude _id
+    return this.http.post<Flight>(this.apiUrl, flightWithoutId, { headers: this.getHeaders() });
   }
 
   updateFlight(flight: Flight): Observable<Flight> {
-    return this.http.put<Flight>(`${this.apiUrl}/${flight._id}`, flight);
+    return this.http.put<Flight>(`${this.apiUrl}/${flight._id}`, flight, { headers: this.getHeaders() });
   }
 
   deleteFlight(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 }

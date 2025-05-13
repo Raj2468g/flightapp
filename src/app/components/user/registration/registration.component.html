@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gradient-to-r from-blue-500 to-indigo-500 min-h-screen flex items-center justify-center">
+<div class="registration-container bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-full max-w-md">
+  <h2 class="text-2xl font-bold text-blue-800 mb-6 text-center">
+    <i class="fas fa-user-plus mr-2"></i> Register
+  </h2>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label for="username" class="block text-blue-700 font-medium">Username:</label>
+      <input type="text" id="username" formControlName="username" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter username">
+      <span class="text-red-600 text-sm" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
+        {{ getErrorMessage('username') }}
+      </span>
+    </div>
+    <div>
+      <label for="email" class="block text-blue-700 font-medium">Email:</label>
+      <input type="email" id="email" formControlName="email" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter email">
+      <span class="text-red-600 text-sm" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        {{ getErrorMessage('email') }}
+      </span>
+    </div>
+    <div>
+      <label for="password" class="block text-blue-700 font-medium">Password:</label>
+      <input type="password" id="password" formControlName="password" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter password">
+      <span class="text-red-600 text-sm" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        {{ getErrorMessage('password') }}
+      </span>
+    </div>
+    <div>
+      <label for="confirmPassword" class="block text-blue-700 font-medium">Confirm Password:</label>
+      <input type="password" id="confirmPassword" formControlName="confirmPassword" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm password">
+      <span class="text-red-600 text-sm" *ngIf="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('mismatch'))">
+        {{ getErrorMessage('confirmPassword') }}
+      </span>
+    </div>
+    <div>
+      <label for="phone" class="block text-blue-700 font-medium">Phone (Optional):</label>
+      <input type="tel" id="phone" formControlName="phone" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter phone number">
+    </div>
+    <div>
+      <label for="gender" class="block text-blue-700 font-medium">Gender (Optional):</label>
+      <select id="gender" formControlName="gender" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Select</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <button type="submit" [disabled]="registerForm.invalid" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition duration-300">
+      <i class="fas fa-user-plus mr-2"></i> Register
+    </button>
+    <span class="text-red-600 text-sm block mt-2" *ngIf="registerForm.errors?.['server']">{{ registerForm.errors?.['server'] }}</span>
+  </form>
+  <p class="mt-4 text-center">Already have an account? <a [routerLink]="['/login']" class="text-blue-500 hover:underline">Log in</a></p>
+</div>
+</body>
+</html>

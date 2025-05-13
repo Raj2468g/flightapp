@@ -1,23 +1,31 @@
 import { Injectable } from '@angular/core';
-     import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
-     import { AuthService } from '../services/auth.service';
+import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
-     @Injectable({
-       providedIn: 'root'
-     })
-     export class AuthGuard implements CanActivate {
-       constructor(private authService: AuthService, private router: Router) {}
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthGuard implements CanActivate {
+  constructor(private authService: AuthService, private router: Router) {}
 
-       canActivate(route: ActivatedRouteSnapshot): boolean {
-         if (!this.authService.isLoggedIn()) {
-           this.router.navigate(['/user-login']);
-           return false;
-         }
-         const expectedRole = route.data['role'];
-         if (!this.authService.hasRole(expectedRole)) {
-           this.router.navigate([this.authService.hasRole('admin') ? '/admin/dashboard' : '/user/dashboard']);
-           return false;
-         }
-         return true;
-       }
-     }
+  canActivate(route: ActivatedRouteSnapshot): boolean {
+    const expectedRole = route.data['role'];
+    const user = this.authService.getCurrentUser();
+    const token = localStorage.getItem('token');
+
+    console.log('AuthGuard check:', { user, token, expectedRole });
+    if (!token || !user) {
+      console.log('No token or user, redirecting to:', expectedRole === 'admin' ? '/admin/login' : '/login');
+      this.router.navigate([expectedRole === 'admin' ? '/admin/login' : '/login']);
+      return false;
+    }
+
+    if (user.role !== expectedRole) {
+      console.log(`Role mismatch: expected ${expectedRole}, got ${user.role}`);
+      this.router.navigate([user.role === 'admin' ? '/admin' : '/login']);
+      return false;
+    }
+
+    return true;
+  }
+}

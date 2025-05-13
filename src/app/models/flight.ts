@@ -1,9 +1,14 @@
 export interface Flight {
-    _id?: string;
-    flightNumber: string;
-    origin: string;
-    destination: string;
-    departureTime: string;
-    price: number;
-    maxTickets: number;
-  }
+  _id?: string;
+  flightNumber: string;
+  departure: string;
+  destination: string;
+  date: string;
+  time: string;
+  maxTickets: number;
+  price: number;
+  availableTickets: number;
+  seats: string[];
+  bookedSeats: string[];
+  version: number;
+}

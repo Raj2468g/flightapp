@@ -1,33 +1,153 @@
-<div class="container">
-  <div class="welcome-container">
-    <h1>User Dashboard</h1>
-    <p>Welcome, {{ currentUserName }}!</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+<app-user-nav></app-user-nav>
+<div class="container mx-auto mt-8 p-4 sm:p-6">
+  <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-6"><i class="fas fa-tachometer-alt mr-2"></i> Welcome, {{ username || 'User' }}!</h2>
+
+  <!-- Error Messages -->
+  <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded relative mb-4 animate-fade-in" *ngIf="errors.length > 0" role="alert">
+    <p *ngFor="let error of errors" class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i> {{ error }}</p>
+    <div class="flex space-x-2 mt-2">
+      <button class="text-red-500 underline" (click)="loadBookings()" *ngIf="errors.includes('Failed to load bookings. Please try again later.')"><i class="fas fa-redo mr-1"></i> Retry</button>
+      <button class="text-red-500 underline" (click)="errors = []"><i class="fas fa-times mr-1"></i> Dismiss</button>
+    </div>
   </div>
-  <app-user-nav></app-user-nav>
-  <div class="table-container">
-    <h2>Available Flights</h2>
-    <table *ngIf="flights.length > 0; else noFlights">
-      <thead>
-        <tr>
-          <th>Flight Number</th>
-          <th>Origin</th>
-          <th>Destination</th>
-          <th>Departure</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let flight of flights">
-          <td>{{ flight.flightNumber }}</td>
-          <td>{{ flight.origin }}</td>
-          <td>{{ flight.destination }}</td>
-          <td>{{ flight.departureTime | date:'short' }}</td>
-          <td>{{ flight.price | currency:'INR' }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <ng-template #noFlights>
-      <p class="no-flights">No flights available at the moment.</p>
+
+  <!-- Loading Overlay -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="isLoading">
+    <div class="text-white text-lg"><i class="fas fa-spinner fa-spin mr-2 animate-spin"></i> Loading Bookings...</div>
+  </div>
+
+  <!-- Search and Sort -->
+  <div class="bg-white bg-opacity-90 p-4 rounded-lg shadow-md mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-3 text-blue-500"></i>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()" placeholder="Search by flight, username, or date" class="w-full pl-10 p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+        <button class="absolute right-2 top-2 text-gray-500" (click)="searchQuery = ''; onSearchInput()" *ngIf="searchQuery"><i class="fas fa-times"></i></button>
+      </div>
+      <div>
+        <select [(ngModel)]="sortBy" (change)="sortBookings()" class="w-full p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+          <option value="flightNumber-asc">Flight Number: A-Z</option>
+          <option value="flightNumber-desc">Flight Number: Z-A</option>
+          <option value="totalPrice-asc">Price: Low to High</option>
+          <option value="totalPrice-desc">Price: High to Low</option>
+          <option value="bookingDate-asc">Date: Earliest First</option>
+          <option value="bookingDate-desc">Date: Latest First</option>
+        </select>
+      </div>
+      <button (click)="resetFilters()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors duration-300">
+        <i class="fas fa-times mr-2"></i> Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Bookings Table -->
+  <h3 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4"><i class="fas fa-ticket-alt mr-2"></i> Your Bookings</h3>
+  <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-md">
+    <div class="overflow-x-auto" *ngIf="paginatedBookings.length && !isLoading; else noBookings">
+      <table class="min-w-full bg-white rounded-lg">
+        <thead class="bg-blue-600 text-white sticky top-0">
+          <tr>
+            <th class="py-2 px-4"><i class="fas fa-plane mr-2"></i> Flight</th>
+            <th class="py-2 px-4"><i class="fas fa-plane-departure mr-2"></i> From</th>
+            <th class="py-2 px-4"><i class="fas fa-plane-arrival mr-2"></i> To</th>
+            <th class="py-2 px-4"><i class="fas fa-calendar-alt mr-2"></i> Flight Date</th>
+            <th class="py-2 px-4"><i class="fas fa-clock mr-2"></i> Time</th>
+            <th class="py-2 px-4"><i class="fas fa-user mr-2"></i> Username</th>
+            <th class="py-2 px-4"><i class="fas fa-chair mr-2"></i> Seats</th>
+            <th class="py-2 px-4"><i class="fas fa-dollar-sign mr-2"></i> Price</th>
+            <th class="py-2 px-4"><i class="fas fa-calendar-alt mr-2"></i> Booking Date</th>
+            <th class="py-2 px-4"><i class="fas fa-info-circle mr-2"></i> Status</th>
+            <th class="py-2 px-4"><i class="fas fa-cog mr-2"></i> Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let booking of paginatedBookings" class="border-b hover:bg-gray-50 transition-colors duration-200" [ngClass]="{'opacity-50': booking.status === 'Cancelled'}">
+            <td class="py-2 px-4">{{ booking.flightNumber || 'N/A' }}</td>
+            <td class="py-2 px-4">{{ booking.departure || 'N/A' }}</td>
+            <td class="py-2 px-4">{{ booking.destination || 'N/A' }}</td>
+            <td class="py-2 px-4">{{ booking.flightDate || 'N/A' }}</td>
+            <td class="py-2 px-4">{{ booking.flightTime || 'N/A' }}</td>
+            <td class="py-2 px-4">{{ booking.username || 'N/A' }}</td>
+            <td class="py-2 px-4" [title]="booking.seatNumber.join(', ') || 'No seats assigned'">{{ booking.seatNumber.join(', ') || booking.seats || 'N/A' }}</td>
+            <td class="py-2 px-4">${{ (booking.totalPrice || 0) | number:'1.2-2' }}</td>
+            <td class="py-2 px-4">{{ booking.bookingDate || 'N/A' }}</td>
+            <td class="py-2 px-4">
+              <span class="text-sm px-2 py-1 rounded" [ngClass]="getStatusClass(booking)" [title]="getStatusTooltip(booking)">
+                {{ booking.status || 'Confirmed' }}
+              </span>
+            </td>
+            <td class="py-2 px-4 flex space-x-2">
+              <button *ngIf="booking._id && booking.status !== 'Cancelled'" (click)="openCancelModal(booking._id)" class="text-red-600 hover:text-red-800" title="Cancel Booking">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+              <button *ngIf="booking.flightId" (click)="viewFlight(booking.flightId)" class="text-blue-600 hover:text-blue-800" title="View Flight Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button *ngIf="booking.flightId && booking.status !== 'Cancelled'" (click)="rebookFlight(booking.flightId)" class="text-green-600 hover:text-green-800" title="Rebook Flight">
+                <i class="fas fa-redo"></i>
+              </button>
+              <button *ngIf="booking._id" (click)="downloadBooking(booking)" class="text-purple-600 hover:text-purple-800" title="Download Booking">
+                <i class="fas fa-download"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4">
+        <button (click)="prevPage()" [disabled]="currentPage === 1" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50">
+          <i class="fas fa-chevron-left mr-2"></i> Previous
+        </button>
+        <span class="text-blue-800">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50">
+          Next <i class="fas fa-chevron-right ml-2"></i>
+        </button>
+      </div>
+    </div>
+    <ng-template #noBookings>
+      <p class="text-blue-600 text-lg" *ngIf="!isLoading"><i class="fas fa-exclamation-circle mr-2"></i> No bookings found.</p>
     </ng-template>
   </div>
+
+  <!-- Cancel Confirmation Modal -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="showCancelModal">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full animate-fade-in sm:max-w-lg">
+      <h3 class="text-xl font-semibold text-red-700 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i> Confirm Cancellation</h3>
+      <p class="text-gray-700 mb-4">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+      <div class="mb-4">
+        <label for="cancelReason" class="block text-gray-700">Reason for cancellation (optional):</label>
+        <textarea id="cancelReason" [(ngModel)]="cancelReason" class="w-full p-2 border rounded bg-white text-gray-800 focus:ring-2 focus:ring-red-500" rows="3" placeholder="e.g., Change of plans"></textarea>
+      </div>
+      <div class="flex space-x-4">
+        <button class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300" (click)="confirmCancel()" [disabled]="isLoading">
+          <i class="fas fa-trash-alt mr-2"></i> Cancel Booking
+        </button>
+        <button class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300" (click)="showCancelModal = false" [disabled]="isLoading">
+          <i class="fas fa-times mr-2"></i> Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="showSuccessModal">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full animate-fade-in sm:max-w-lg">
+      <h3 class="text-xl font-semibold text-green-700 mb-4"><i class="fas fa-check-circle mr-2"></i> Booking Cancelled!</h3>
+      <p class="text-gray-700 mb-4">Your booking has been successfully cancelled.</p>
+      <button class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300" (click)="showSuccessModal = false">
+        <i class="fas fa-check mr-2"></i> OK
+      </button>
+    </div>
+  </div>
 </div>
+</body>
+</html>

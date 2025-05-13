@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+<app-user-nav></app-user-nav>
+<div class="container mx-auto mt-8 p-4 sm:p-6">
+  <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-6"><i class="fas fa-plane mr-2"></i> Available Flights</h2>
+
+  <!-- Error Messages -->
+  <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded relative mb-4" *ngIf="errors.length > 0" role="alert">
+    <p *ngFor="let error of errors" class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i> {{ error }}</p>
+    <div class="flex space-x-2 mt-2">
+      <button class="text-red-500 underline" (click)="loadFlights()" *ngIf="errors.includes('Failed to load flights. Please try again later.')"><i class="fas fa-redo mr-1"></i> Retry</button>
+      <button class="text-red-500 underline" (click)="errors = []"><i class="fas fa-times mr-1"></i> Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="isLoading">
+    <div class="text-white text-lg"><i class="fas fa-spinner fa-spin mr-2 animate-spin"></i> Loading Flights...</div>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="bg-white bg-opacity-90 p-4 rounded-lg shadow-md mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-3 text-blue-500"></i>
+        <input type="text" [(ngModel)]="searchQuery" (input)="filterFlights()" placeholder="Search by flight, departure, or destination" class="w-full pl-10 p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+        <button class="absolute right-2 top-2 text-gray-500" (click)="searchQuery = ''; filterFlights()" *ngIf="searchQuery"><i class="fas fa-times"></i></button>
+      </div>
+      <div>
+        <input type="date" [(ngModel)]="dateFilterStart" (change)="filterFlights()" placeholder="Start Date" class="w-full p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <input type="date" [(ngModel)]="dateFilterEnd" (change)="filterFlights()" placeholder="End Date" class="w-full p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <input type="number" [(ngModel)]="priceFilterMax" (input)="filterFlights()" placeholder="Max Price ($)" min="0" class="w-full p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div class="flex space-x-2">
+        <select [(ngModel)]="sortBy" (change)="sortFlights()" class="w-full p-2 border rounded bg-white text-blue-800 focus:ring-2 focus:ring-blue-500">
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="date-asc">Date: Earliest First</option>
+          <option value="date-desc">Date: Latest First</option>
+          <option value="seats-asc">Seats: Low to High</option>
+          <option value="seats-desc">Seats: High to Low</option>
+          <option value="time-asc">Time: Earliest First</option>
+          <option value="time-desc">Time: Latest First</option>
+        </select>
+        <button (click)="resetFilters()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors duration-300">
+          <i class="fas fa-times mr-2"></i> Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flights List -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngIf="filteredFlights.length === 0 && !isLoading" class="text-center text-blue-600 text-lg col-span-full">
+      <i class="fas fa-exclamation-circle mr-2"></i> No flights match your filters.
+    </div>
+    <div *ngFor="let flight of filteredFlights" class="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1" [ngClass]="getAvailabilityClass(flight)">
+      <div class="flex justify-between items-center mb-2">
+        <p class="font-semibold text-blue-800"><i class="fas fa-plane mr-2"></i> {{ flight.flightNumber }}</p>
+        <span class="text-sm px-2 py-1 rounded" [ngClass]="getAvailabilityBadgeClass(flight)" [title]="getAvailabilityTooltip(flight)">
+          {{ getAvailabilityStatus(flight) }}
+        </span>
+      </div>
+      <p><i class="fas fa-plane-departure mr-2"></i> <strong>From:</strong> {{ flight.departure }}</p>
+      <p><i class="fas fa-plane-arrival mr-2"></i> <strong>To:</strong> {{ flight.destination }}</p>
+      <p><i class="fas fa-calendar-alt mr-2"></i> <strong>Date:</strong> {{ flight.date }}</p>
+      <p><i class="fas fa-clock mr-2"></i> <strong>Time:</strong> {{ flight.time }}</p>
+      <p><i class="fas fa-dollar-sign mr-2"></i> <strong>Price:</strong> ${{ flight.price }}</p>
+      <p><i class="fas fa-ticket-alt mr-2"></i> <strong>Available:</strong> {{ flight.availableTickets }} seats</p>
+      <a [routerLink]="['/user/book-ticket']" [queryParams]="{ flightId: flight._id }" class="mt-4 inline-block w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-center" [ngClass]="{'opacity-50 cursor-not-allowed': flight.availableTickets === 0}" [attr.disabled]="flight.availableTickets === 0 ? true : null">
+        <i class="fas fa-ticket-alt mr-2"></i> {{ flight.availableTickets === 0 ? 'Sold Out' : 'Book This Flight' }}
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

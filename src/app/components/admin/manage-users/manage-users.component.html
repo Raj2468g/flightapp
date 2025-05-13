@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<app-admin-nav></app-admin-nav>
+<div class="manage-users-container container mx-auto mt-8 p-4">
+  <h2 class="text-2xl font-bold text-blue-800 mb-4"><i class="fas fa-users"></i> Manage Users</h2>
+
+  <!-- Error Messages -->
+  <div class="error-messages bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" *ngIf="errors.length > 0">
+    <p *ngFor="let error of errors" class="error"><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading text-center text-blue-600" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading...
+  </div>
+
+  <!-- Add User Form -->
+  <div class="add-user-form bg-white bg-opacity-20 p-6 rounded-lg shadow-md mb-8">
+    <h3 class="text-xl font-semibold text-blue-700 mb-4"><i class="fas fa-plus-circle"></i> Add New User</h3>
+    <form (ngSubmit)="addUser()" class="user-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="form-group">
+        <label for="username" class="block text-blue-700 font-medium"><i class="fas fa-user"></i> Username</label>
+        <input type="text" id="username" [(ngModel)]="newUser.username" name="username" required pattern="[a-zA-Z0-9]{4,20}" title="4-20 alphanumeric characters" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <div class="form-group">
+        <label for="email" class="block text-blue-700 font-medium"><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" id="email" [(ngModel)]="newUser.email" name="email" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <div class="form-group">
+        <label for="password" class="block text-blue-700 font-medium"><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="password" [(ngModel)]="newUser.password" name="password" required minlength="6" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <div class="form-group">
+        <label for="phone" class="block text-blue-700 font-medium"><i class="fas fa-phone"></i> Phone</label>
+        <input type="tel" id="phone" [(ngModel)]="newUser.phone" name="phone" pattern="\+?[1-9]\d{1,14}" title="Valid international phone number" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+      </div>
+      <div class="form-group">
+        <label for="gender" class="block text-blue-700 font-medium"><i class="fas fa-venus-mars"></i> Gender</label>
+        <select id="gender" [(ngModel)]="newUser.gender" name="gender" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="role" class="block text-blue-700 font-medium"><i class="fas fa-user-shield"></i> Role</label>
+        <select id="role" [(ngModel)]="newUser.role" name="role" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition duration-300 col-span-full" [disabled]="isLoading"><i class="fas fa-plus"></i> Add User</button>
+    </form>
+  </div>
+
+  <!-- User List -->
+  <div class="user-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngIf="users.length === 0 && !isLoading" class="no-users text-center text-blue-600 text-lg">
+      <i class="fas fa-exclamation-circle"></i> No users found.
+    </div>
+    <div *ngFor="let user of users" class="user-card bg-white bg-opacity-20 p-4 rounded-lg shadow-md">
+      <div class="card-header flex justify-between items-center mb-4">
+        <span class="username font-bold text-blue-800"><i class="fas fa-user"></i> {{ user.username }}</span>
+        <div class="action-buttons flex space-x-2">
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <button class="btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600" (click)="saveUser()" title="Save Changes" [disabled]="isLoading"><i class="fas fa-save"></i></button>
+            <button class="btn bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600" (click)="cancelEdit()" title="Cancel" [disabled]="isLoading"><i class="fas fa-times"></i></button>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            <button class="btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" (click)="editUser(user)" title="Edit User" [disabled]="isLoading"><i class="fas fa-edit"></i></button>
+            <button class="btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" (click)="deleteUser(user._id ?? '')" title="Delete User" [disabled]="isLoading"><i class="fas fa-trash"></i></button>
+          </ng-container>
+        </div>
+      </div>
+      <div class="card-body grid gap-2">
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-user"></i> Username:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="text" [(ngModel)]="editingUser!.username" name="editUsername" required pattern="[a-zA-Z0-9]{4,20}" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.username }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-envelope"></i> Email:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="email" [(ngModel)]="editingUser!.email" name="editEmail" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.email }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-lock"></i> Password:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="password" [(ngModel)]="editingUser!.password" name="editPassword" placeholder="Leave blank to keep unchanged" minlength="6" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            ******
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-phone"></i> Phone:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <input type="tel" [(ngModel)]="editingUser!.phone" name="editPhone" pattern="\+?[1-9]\d{1,14}" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.phone || 'N/A' }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-venus-mars"></i> Gender:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <select [(ngModel)]="editingUser!.gender" name="editGender" class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.gender || 'N/A' }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-user-shield"></i> Role:</span>
+          <ng-container *ngIf="editingUser && editingUser._id === user._id">
+            <select [(ngModel)]="editingUser!.role" name="editRole" required class="w-full p-2 border border-blue-300 rounded bg-white bg-opacity-80 text-blue-800">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </ng-container>
+          <ng-container *ngIf="!editingUser || editingUser._id !== user._id">
+            {{ user.role }}
+          </ng-container>
+        </div>
+        <div class="card-field flex items-center">
+          <span class="field-label text-blue-700 font-medium min-w-[100px]"><i class="fas fa-calendar-alt"></i> Created At:</span>
+          {{ user.createdAt || 'N/A' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

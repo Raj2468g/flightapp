@@ -1,11 +1,16 @@
 export interface Booking {
-  _id: string;
-  userId: string;
+  _id?: string;
   flightId: string;
+  flightNumber: string;
+  userId: string;
+  username: string;
+  seats: number;
+  seatNumber: string[];
+  totalPrice: number;
   bookingDate: string;
-  flightId_details: {
-    flightNumber: string;
-    origin: string;
-    destination: string;
-  };
+  status?: 'Confirmed' | 'Cancelled';
+  departure?: string;
+  destination?: string;
+  flightDate?: string;
+  flightTime?: string;
 }

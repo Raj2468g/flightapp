@@ -1,18 +1,125 @@
-<div class="container">
-  <app-user-nav></app-user-nav>
-  <div class="booking-container">
-    <h2>Book a Ticket</h2>
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-    <div *ngIf="successMessage" class="success">{{ successMessage }}</div>
-    <div class="form-group">
-      <label for="flightSelect">Select Flight:</label>
-      <select id="flightSelect" [(ngModel)]="selectedFlightId" [disabled]="flights.length === 0">
-        <option value="" disabled>Select a flight</option>
-        <option *ngFor="let flight of flights" [value]="flight._id">
-          {{ flight.flightNumber }}: {{ flight.origin }} to {{ flight.destination }} ({{ flight.departureTime | date:'short' }})
-        </option>
-      </select>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+<app-user-nav></app-user-nav>
+<div class="container mx-auto mt-8 p-4 sm:p-6">
+  <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-6"><i class="fas fa-ticket-alt mr-2"></i> Book a Ticket</h2>
+
+  <!-- Error Messages -->
+  <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded relative mb-4" *ngIf="errors.length > 0" role="alert">
+    <p *ngFor="let error of errors" class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i> {{ error }}</p>
+    <button class="absolute top-2 right-2 text-red-500" (click)="errors = []"><i class="fas fa-times"></i></button>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="isLoading">
+    <div class="text-white text-lg"><i class="fas fa-spinner fa-spin mr-2"></i> Processing...</div>
+  </div>
+
+  <!-- Flight Selection -->
+  <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg mb-8" *ngIf="!selectedFlight && !isLoading">
+    <h3 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4"><i class="fas fa-plane mr-2"></i> Available Flights</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngIf="flights.length === 0" class="text-center text-blue-600 text-lg col-span-full">
+        <i class="fas fa-exclamation-circle mr-2"></i> No flights available.
+      </div>
+      <div *ngFor="let flight of flights" class="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+        <p class="font-semibold text-blue-800"><i class="fas fa-plane mr-2"></i> {{ flight.flightNumber }}</p>
+        <p><i class="fas fa-plane-departure mr-2"></i> <strong>From:</strong> {{ flight.departure }}</p>
+        <p><i class="fas fa-plane-arrival mr-2"></i> <strong>To:</strong> {{ flight.destination }}</p>
+        <p><i class="fas fa-calendar-alt mr-2"></i> <strong>Date:</strong> {{ flight.date }}</p>
+        <p><i class="fas fa-clock mr-2"></i> <strong>Time:</strong> {{ flight.time }}</p>
+        <p><i class="fas fa-dollar-sign mr-2"></i> <strong>Price:</strong> ${{ flight.price }}</p>
+        <p><i class="fas fa-ticket-alt mr-2"></i> <strong>Available:</strong> {{ flight.availableTickets }} seats</p>
+        <button class="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300" (click)="selectFlight(flight)">
+          <i class="fas fa-ticket-alt mr-2"></i> Book This Flight
+        </button>
+      </div>
     </div>
-    <button (click)="bookTicket()" class="btn" [disabled]="!userId || !selectedFlightId">Book Ticket</button>
+  </div>
+
+  <!-- Booking Form -->
+  <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg" *ngIf="selectedFlight && !showConfirmation && !bookingSuccess">
+    <h3 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4"><i class="fas fa-plane mr-2"></i> Booking for {{ selectedFlight.flightNumber }}</h3>
+    <form (ngSubmit)="proceedToConfirmation()" class="grid grid-cols-1 gap-6">
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <p><strong>Flight:</strong> {{ selectedFlight.flightNumber }}</p>
+        <p><strong>From:</strong> {{ selectedFlight.departure }}</p>
+        <p><strong>To:</strong> {{ selectedFlight.destination }}</p>
+        <p><strong>Date:</strong> {{ selectedFlight.date }}</p>
+        <p><strong>Time:</strong> {{ selectedFlight.time }}</p>
+        <p><strong>Price per Ticket:</strong> ${{ selectedFlight.price }}</p>
+        <p><strong>Available Seats:</strong> {{ selectedFlight.availableTickets }}</p>
+      </div>
+      <div class="form-group">
+        <label for="seats" class="block text-blue-700 font-medium"><i class="fas fa-chair mr-2"></i> Number of Seats</label>
+        <input type="number" id="seats" [(ngModel)]="booking.seats" name="seats" min="1" [max]="selectedFlight.availableTickets" (input)="validateSeats()" required class="w-full p-2 border rounded bg-white bg-opacity-80 text-blue-800 focus:ring-2 focus:ring-blue-500" [ngClass]="{'border-red-500': seatsInvalid}">
+        <p class="text-red-500 text-sm mt-1" *ngIf="seatsInvalid">{{ seatsError }}</p>
+      </div>
+      <div class="form-group">
+        <label class="block text-blue-700 font-medium"><i class="fas fa-ticket-alt mr-2"></i> Assigned Seats</label>
+        <p class="text-blue-600 mt-2">{{ generatedSeats.join(', ') || 'Seats will be assigned automatically' }}</p>
+      </div>
+      <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300" [disabled]="isLoading || seatsInvalid">
+          <i class="fas fa-check mr-2"></i> Review Booking
+        </button>
+        <button type="button" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300" (click)="cancelBooking()" [disabled]="isLoading">
+          <i class="fas fa-times mr-2"></i> Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Confirmation Preview -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="showConfirmation">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full animate-fade-in">
+      <h3 class="text-xl font-semibold text-blue-700 mb-4"><i class="fas fa-check-circle mr-2"></i> Confirm Your Booking</h3>
+      <div class="bg-blue-50 p-4 rounded-lg mb-4">
+        <p><strong>Flight:</strong> {{ selectedFlight?.flightNumber }}</p>
+        <p><strong>From:</strong> {{ selectedFlight?.departure }}</p>
+        <p><strong>To:</strong> {{ selectedFlight?.destination }}</p>
+        <p><strong>Date:</strong> {{ selectedFlight?.date }}</p>
+        <p><strong>Time:</strong> {{ selectedFlight?.time }}</p>
+        <p><strong>Seats:</strong> {{ generatedSeats.join(', ') }}</p>
+        <p><strong>Total Price:</strong> ${{ booking.seats * (selectedFlight?.price || 0) }}</p>
+        <p><strong>Booked By:</strong> {{ authService.getCurrentUser()?.username || 'User' }}</p>
+      </div>
+      <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <button class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300" (click)="bookFlight()" [disabled]="isLoading">
+          <i class="fas fa-check mr-2"></i> Confirm Booking
+        </button>
+        <button class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-300" (click)="showConfirmation = false" [disabled]="isLoading">
+          <i class="fas fa-arrow-left mr-2"></i> Back to Edit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="bookingSuccess">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full animate-fade-in">
+      <h3 class="text-xl font-semibold text-green-700 mb-4"><i class="fas fa-check-circle mr-2"></i> Booking Successful!</h3>
+      <div class="bg-green-50 p-4 rounded-lg mb-4">
+        <p><strong>Flight:</strong> {{ lastBooking?.flightNumber }}</p>
+        <p><strong>From:</strong> {{ lastBooking?.departure }}</p>
+        <p><strong>To:</strong> {{ lastBooking?.destination }}</p>
+        <p><strong>Seats:</strong> {{ lastBooking?.seatNumber.join(', ') }}</p>
+        <p><strong>Total Price:</strong> ${{ lastBooking?.totalPrice }}</p>
+        <p><strong>Booking Date:</strong> {{ lastBooking?.bookingDate }}</p>
+        <p><strong>Booked By:</strong> {{ lastBooking?.username }}</p>
+      </div>
+      <button class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300" (click)="router.navigate(['/user'])">
+        <i class="fas fa-home mr-2"></i> Back to Dashboard
+      </button>
+    </div>
   </div>
 </div>
+</body>
+</html>
